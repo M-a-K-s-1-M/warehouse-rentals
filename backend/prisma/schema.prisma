@@ -45,6 +45,9 @@ model Warehouse {
   address     String
   description String?
   square      Int
+  cellSquare  Int     @map("cell_square")
+  gridRows    Int     @map("grid_rows")
+  gridCols    Int     @map("grid_cols")
   price       Float
 
   createdAt DateTime @default(now()) @map("created_at")

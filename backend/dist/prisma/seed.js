@@ -36,6 +36,10 @@ async function main() {
             address: "Industrial Park 5",
         },
     });
+    const cellSquare = 25;
+    const totalCells = 1200 / cellSquare;
+    const gridRows = 6;
+    const gridCols = totalCells / gridRows;
     const warehouse = existingWarehouse ??
         (await prisma.warehouse.create({
             data: {
@@ -43,6 +47,9 @@ async function main() {
                 address: "Industrial Park 5",
                 description: "Primary storage facility",
                 square: 1200,
+                cellSquare,
+                gridRows,
+                gridCols,
                 price: 45000,
             },
         }));

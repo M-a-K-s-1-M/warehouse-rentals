@@ -15,12 +15,12 @@ export declare class ApplicationsService {
         }>;
     }): Promise<{
         photos: {
+            url: string;
             id: string;
             createdAt: Date;
             applicationId: string;
             uploadedById: string | null;
             kind: import("@prisma/client").$Enums.PhotoKind;
-            url: string;
         }[];
     } & {
         id: string;
@@ -36,12 +36,12 @@ export declare class ApplicationsService {
         kind: PhotoKind;
         uploadedById?: string;
     }): Promise<{
+        url: string;
         id: string;
         createdAt: Date;
         applicationId: string;
         uploadedById: string | null;
         kind: import("@prisma/client").$Enums.PhotoKind;
-        url: string;
     }>;
     getApplicationById(id: string): Promise<({
         user: {
@@ -58,16 +58,19 @@ export declare class ApplicationsService {
             address: string;
             description: string | null;
             square: number;
+            cellSquare: number;
+            gridRows: number;
+            gridCols: number;
             price: number;
             updatedAt: Date;
         };
         photos: {
+            url: string;
             id: string;
             createdAt: Date;
             applicationId: string;
             uploadedById: string | null;
             kind: import("@prisma/client").$Enums.PhotoKind;
-            url: string;
         }[];
     } & {
         id: string;
@@ -83,12 +86,12 @@ export declare class ApplicationsService {
         warehouseId?: string;
     }): Promise<({
         photos: {
+            url: string;
             id: string;
             createdAt: Date;
             applicationId: string;
             uploadedById: string | null;
             kind: import("@prisma/client").$Enums.PhotoKind;
-            url: string;
         }[];
     } & {
         id: string;
