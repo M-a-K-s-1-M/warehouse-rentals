@@ -19,6 +19,7 @@ export class RentalsService {
         extraContactName?: string;
         extraContactEmail?: string;
     }) {
+        this.assertDateOrder(input.startDate, input.endDate);
         const warehouse = await this.getWarehouse(input.warehouseId);
         this.assertGridBounds(warehouse.gridRows, warehouse.gridCols, input);
 
@@ -32,6 +33,8 @@ export class RentalsService {
             colStart: input.colStart,
             colEnd: input.colEnd,
         });
+
+        const rentalStatus = this.getRentalStatus(input.startDate, input.endDate);
 
         return this.prisma.rental.create({
             data: {
@@ -50,7 +53,7 @@ export class RentalsService {
                 totalPrice: totals.totalPrice,
                 extraContactName: input.extraContactName ?? null,
                 extraContactEmail: input.extraContactEmail ?? null,
-                rentalStatus: RentalStatusType.MORE_THAN_60_DAYS,
+                rentalStatus,
             },
         });
     }
@@ -68,7 +71,7 @@ export class RentalsService {
     async getRental(id: string) {
         const rental = await this.prisma.rental.findUnique({ where: { id } });
         if (!rental) {
-            throw new NotFoundException("Rental not found");
+            throw new NotFoundException("Аренда не найдена");
         }
         return rental;
     }
@@ -101,6 +104,8 @@ export class RentalsService {
         const colEnd = input.colEnd ?? existing.colEnd;
         const startDate = input.startDate ?? existing.startDate;
         const endDate = input.endDate ?? existing.endDate;
+
+        this.assertDateOrder(startDate, endDate);
 
         this.assertGridBounds(warehouse.gridRows, warehouse.gridCols, {
             rowStart,
@@ -151,7 +156,7 @@ export class RentalsService {
                     input.extraContactEmail === undefined
                         ? existing.extraContactEmail
                         : input.extraContactEmail,
-                rentalStatus: input.rentalStatus ?? existing.rentalStatus,
+                rentalStatus: input.rentalStatus ?? this.getRentalStatus(startDate, endDate),
             },
         });
     }
@@ -164,7 +169,7 @@ export class RentalsService {
     private async getWarehouse(id: string) {
         const warehouse = await this.prisma.warehouse.findUnique({ where: { id } });
         if (!warehouse) {
-            throw new NotFoundException("Warehouse not found");
+            throw new NotFoundException("Склад не найден");
         }
         return warehouse;
     }
@@ -175,13 +180,13 @@ export class RentalsService {
         input: { rowStart: number; rowEnd: number; colStart: number; colEnd: number },
     ) {
         if (input.rowStart <= 0 || input.colStart <= 0) {
-            throw new BadRequestException("Grid coordinates must be positive");
+            throw new BadRequestException("Координаты сетки должны быть положительными");
         }
         if (input.rowStart > input.rowEnd || input.colStart > input.colEnd) {
-            throw new BadRequestException("Grid start must be before end");
+            throw new BadRequestException("Начало области должно быть раньше конца");
         }
         if (input.rowEnd > maxRows || input.colEnd > maxCols) {
-            throw new BadRequestException("Grid area exceeds warehouse bounds");
+            throw new BadRequestException("Область выходит за границы склада");
         }
     }
 
@@ -195,6 +200,23 @@ export class RentalsService {
         const totalPrice = totalCells * pricePerCell;
 
         return { totalCells, areaSquare, pricePerCell, totalPrice };
+    }
+
+    private getRentalStatus(startDate: Date, endDate: Date) {
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+        if (days < 60) {
+            return RentalStatusType.LESS_THAN_60_DAYS;
+        }
+
+        return RentalStatusType.MORE_THAN_60_DAYS;
+    }
+
+    private assertDateOrder(startDate: Date, endDate: Date) {
+        if (endDate <= startDate) {
+            throw new BadRequestException("Дата окончания должна быть позже даты начала");
+        }
     }
 
     private async assertNoOverlap(input: {
@@ -224,7 +246,7 @@ export class RentalsService {
         );
 
         if (hasOverlap) {
-            throw new BadRequestException("Rental area overlaps existing contract");
+            throw new BadRequestException("Область пересекается с существующей арендой");
         }
     }
 

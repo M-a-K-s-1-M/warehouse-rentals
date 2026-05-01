@@ -19,6 +19,7 @@ let RentalsService = class RentalsService {
         this.prisma = prisma;
     }
     async createRental(input) {
+        this.assertDateOrder(input.startDate, input.endDate);
         const warehouse = await this.getWarehouse(input.warehouseId);
         this.assertGridBounds(warehouse.gridRows, warehouse.gridCols, input);
         const totals = this.calculateTotals(warehouse.cellSquare, warehouse.pricePerCell, input);
@@ -31,6 +32,7 @@ let RentalsService = class RentalsService {
             colStart: input.colStart,
             colEnd: input.colEnd,
         });
+        const rentalStatus = this.getRentalStatus(input.startDate, input.endDate);
         return this.prisma.rental.create({
             data: {
                 warehouseId: warehouse.id,
@@ -48,7 +50,7 @@ let RentalsService = class RentalsService {
                 totalPrice: totals.totalPrice,
                 extraContactName: input.extraContactName ?? null,
                 extraContactEmail: input.extraContactEmail ?? null,
-                rentalStatus: client_1.RentalStatusType.MORE_THAN_60_DAYS,
+                rentalStatus,
             },
         });
     }
@@ -64,7 +66,7 @@ let RentalsService = class RentalsService {
     async getRental(id) {
         const rental = await this.prisma.rental.findUnique({ where: { id } });
         if (!rental) {
-            throw new common_1.NotFoundException("Rental not found");
+            throw new common_1.NotFoundException("Аренда не найдена");
         }
         return rental;
     }
@@ -79,6 +81,7 @@ let RentalsService = class RentalsService {
         const colEnd = input.colEnd ?? existing.colEnd;
         const startDate = input.startDate ?? existing.startDate;
         const endDate = input.endDate ?? existing.endDate;
+        this.assertDateOrder(startDate, endDate);
         this.assertGridBounds(warehouse.gridRows, warehouse.gridCols, {
             rowStart,
             rowEnd,
@@ -123,7 +126,7 @@ let RentalsService = class RentalsService {
                 extraContactEmail: input.extraContactEmail === undefined
                     ? existing.extraContactEmail
                     : input.extraContactEmail,
-                rentalStatus: input.rentalStatus ?? existing.rentalStatus,
+                rentalStatus: input.rentalStatus ?? this.getRentalStatus(startDate, endDate),
             },
         });
     }
@@ -134,19 +137,19 @@ let RentalsService = class RentalsService {
     async getWarehouse(id) {
         const warehouse = await this.prisma.warehouse.findUnique({ where: { id } });
         if (!warehouse) {
-            throw new common_1.NotFoundException("Warehouse not found");
+            throw new common_1.NotFoundException("Склад не найден");
         }
         return warehouse;
     }
     assertGridBounds(maxRows, maxCols, input) {
         if (input.rowStart <= 0 || input.colStart <= 0) {
-            throw new common_1.BadRequestException("Grid coordinates must be positive");
+            throw new common_1.BadRequestException("Координаты сетки должны быть положительными");
         }
         if (input.rowStart > input.rowEnd || input.colStart > input.colEnd) {
-            throw new common_1.BadRequestException("Grid start must be before end");
+            throw new common_1.BadRequestException("Начало области должно быть раньше конца");
         }
         if (input.rowEnd > maxRows || input.colEnd > maxCols) {
-            throw new common_1.BadRequestException("Grid area exceeds warehouse bounds");
+            throw new common_1.BadRequestException("Область выходит за границы склада");
         }
     }
     calculateTotals(cellSquare, pricePerCell, input) {
@@ -154,6 +157,19 @@ let RentalsService = class RentalsService {
         const areaSquare = totalCells * cellSquare;
         const totalPrice = totalCells * pricePerCell;
         return { totalCells, areaSquare, pricePerCell, totalPrice };
+    }
+    getRentalStatus(startDate, endDate) {
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        if (days < 60) {
+            return client_1.RentalStatusType.LESS_THAN_60_DAYS;
+        }
+        return client_1.RentalStatusType.MORE_THAN_60_DAYS;
+    }
+    assertDateOrder(startDate, endDate) {
+        if (endDate <= startDate) {
+            throw new common_1.BadRequestException("Дата окончания должна быть позже даты начала");
+        }
     }
     async assertNoOverlap(input) {
         const overlapping = await this.prisma.rental.findMany({
@@ -166,7 +182,7 @@ let RentalsService = class RentalsService {
         });
         const hasOverlap = overlapping.some((rental) => this.rectanglesOverlap({ rowStart: rental.rowStart, rowEnd: rental.rowEnd, colStart: rental.colStart, colEnd: rental.colEnd }, { rowStart: input.rowStart, rowEnd: input.rowEnd, colStart: input.colStart, colEnd: input.colEnd }));
         if (hasOverlap) {
-            throw new common_1.BadRequestException("Rental area overlaps existing contract");
+            throw new common_1.BadRequestException("Область пересекается с существующей арендой");
         }
     }
     rectanglesOverlap(a, b) {

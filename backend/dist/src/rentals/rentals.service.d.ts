@@ -134,6 +134,8 @@ export declare class RentalsService {
     private getWarehouse;
     private assertGridBounds;
     private calculateTotals;
+    private getRentalStatus;
+    private assertDateOrder;
     private assertNoOverlap;
     private rectanglesOverlap;
 }
