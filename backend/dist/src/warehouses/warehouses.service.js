@@ -28,7 +28,7 @@ let WarehousesService = class WarehousesService {
                 cellSquare: input.cellSquare,
                 gridRows: grid.rows,
                 gridCols: grid.cols,
-                price: input.price,
+                pricePerCell: input.pricePerCell,
             },
         });
     }
@@ -59,7 +59,7 @@ let WarehousesService = class WarehousesService {
                 cellSquare: nextCellSquare,
                 gridRows: grid.rows,
                 gridCols: grid.cols,
-                price: input.price ?? warehouse.price,
+                pricePerCell: input.pricePerCell ?? warehouse.pricePerCell,
             },
         });
     }

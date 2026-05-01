@@ -17,7 +17,7 @@ class UpdateWarehouseDto {
     description;
     square;
     cellSquare;
-    price;
+    pricePerCell;
 }
 exports.UpdateWarehouseDto = UpdateWarehouseDto;
 __decorate([
@@ -52,5 +52,5 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], UpdateWarehouseDto.prototype, "price", void 0);
+], UpdateWarehouseDto.prototype, "pricePerCell", void 0);
 //# sourceMappingURL=update-warehouse.dto.js.map

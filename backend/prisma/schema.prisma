@@ -40,15 +40,15 @@ model RefreshToken {
 }
 
 model Warehouse {
-  id          String  @id @default(uuid())
-  title       String
-  address     String
-  description String?
-  square      Int
-  cellSquare  Int     @map("cell_square")
-  gridRows    Int     @map("grid_rows")
-  gridCols    Int     @map("grid_cols")
-  price       Float
+  id           String  @id @default(uuid())
+  title        String
+  address      String
+  description  String?
+  square       Int
+  cellSquare   Int     @map("cell_square")
+  gridRows     Int     @map("grid_rows")
+  gridCols     Int     @map("grid_cols")
+  pricePerCell Float   @map("price_per_cell")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -68,9 +68,22 @@ model Rental {
   user   User   @relation(fields: [userId], references: [id])
   userId String @map("user_id")
 
-  startDate  DateTime @map("start_date")
-  endDate    DateTime @map("end_date")
-  totalPrice Float    @map("total_price")
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  autoRenew Boolean  @default(false) @map("auto_renew")
+
+  rowStart Int @map("row_start")
+  rowEnd   Int @map("row_end")
+  colStart Int @map("col_start")
+  colEnd   Int @map("col_end")
+
+  totalCells   Int   @map("total_cells")
+  areaSquare   Int   @map("area_square")
+  pricePerCell Float @map("price_per_cell")
+  totalPrice   Float @map("total_price")
+
+  extraContactName  String? @map("extra_contact_name")
+  extraContactEmail String? @map("extra_contact_email")
 
   createdAt    DateTime         @default(now()) @map("created_at")
   rentalStatus RentalStatusType @map("rental_status")

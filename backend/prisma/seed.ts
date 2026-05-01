@@ -50,6 +50,7 @@ async function main() {
     const totalCells = 1200 / cellSquare;
     const gridRows = 6;
     const gridCols = totalCells / gridRows;
+    const pricePerCell = 75;
 
     const warehouse =
         existingWarehouse ??
@@ -62,7 +63,7 @@ async function main() {
                 cellSquare,
                 gridRows,
                 gridCols,
-                price: 45000,
+                pricePerCell,
             },
         }));
 
@@ -74,13 +75,28 @@ async function main() {
     });
 
     if (!existingRental) {
+        const rowStart = 1;
+        const rowEnd = 2;
+        const colStart = 1;
+        const colEnd = 5;
+        const rentedCells = (rowEnd - rowStart + 1) * (colEnd - colStart + 1);
+        const areaSquare = rentedCells * warehouse.cellSquare;
+
         await prisma.rental.create({
             data: {
                 userId: client.id,
                 warehouseId: warehouse.id,
                 startDate: new Date(),
                 endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 90),
-                totalPrice: 90000,
+                autoRenew: true,
+                rowStart,
+                rowEnd,
+                colStart,
+                colEnd,
+                totalCells: rentedCells,
+                areaSquare,
+                pricePerCell: warehouse.pricePerCell,
+                totalPrice: rentedCells * warehouse.pricePerCell,
                 rentalStatus: RentalStatusType.MORE_THAN_60_DAYS,
             },
         });

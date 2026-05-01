@@ -61,7 +61,7 @@ export declare class ApplicationsService {
             cellSquare: number;
             gridRows: number;
             gridCols: number;
-            price: number;
+            pricePerCell: number;
             updatedAt: Date;
         };
         photos: {

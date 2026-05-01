@@ -4,5 +4,5 @@ export declare class UpdateWarehouseDto {
     description?: string;
     square?: number;
     cellSquare?: number;
-    price?: number;
+    pricePerCell?: number;
 }

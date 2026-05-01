@@ -11,7 +11,7 @@ export class WarehousesService {
         description?: string;
         square: number;
         cellSquare: number;
-        price: number;
+        pricePerCell: number;
     }) {
         const grid = this.calculateGrid(input.square, input.cellSquare);
 
@@ -24,7 +24,7 @@ export class WarehousesService {
                 cellSquare: input.cellSquare,
                 gridRows: grid.rows,
                 gridCols: grid.cols,
-                price: input.price,
+                pricePerCell: input.pricePerCell,
             },
         });
     }
@@ -51,7 +51,7 @@ export class WarehousesService {
             description?: string;
             square?: number;
             cellSquare?: number;
-            price?: number;
+            pricePerCell?: number;
         },
     ) {
         const warehouse = await this.getWarehouse(id);
@@ -70,7 +70,7 @@ export class WarehousesService {
                 cellSquare: nextCellSquare,
                 gridRows: grid.rows,
                 gridCols: grid.cols,
-                price: input.price ?? warehouse.price,
+                pricePerCell: input.pricePerCell ?? warehouse.pricePerCell,
             },
         });
     }

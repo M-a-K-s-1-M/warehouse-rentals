@@ -26,5 +26,5 @@ export class UpdateWarehouseDto {
     @IsOptional()
     @IsNumber()
     @Min(0)
-    price?: number;
+    pricePerCell?: number;
 }

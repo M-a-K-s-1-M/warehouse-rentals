@@ -17,7 +17,7 @@ class CreateWarehouseDto {
     description;
     square;
     cellSquare;
-    price;
+    pricePerCell;
 }
 exports.CreateWarehouseDto = CreateWarehouseDto;
 __decorate([
@@ -47,5 +47,5 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], CreateWarehouseDto.prototype, "price", void 0);
+], CreateWarehouseDto.prototype, "pricePerCell", void 0);
 //# sourceMappingURL=create-warehouse.dto.js.map

@@ -21,5 +21,5 @@ export class CreateWarehouseDto {
 
     @IsNumber()
     @Min(0)
-    price: number;
+    pricePerCell: number;
 }

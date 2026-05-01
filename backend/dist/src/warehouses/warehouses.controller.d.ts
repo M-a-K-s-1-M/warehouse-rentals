@@ -6,6 +6,7 @@ export declare class WarehousesController {
     constructor(warehousesService: WarehousesService);
     createWarehouse(body: CreateWarehouseDto): Promise<{
         id: string;
+        createdAt: Date;
         title: string;
         address: string;
         description: string | null;
@@ -13,12 +14,12 @@ export declare class WarehousesController {
         cellSquare: number;
         gridRows: number;
         gridCols: number;
-        price: number;
-        createdAt: Date;
+        pricePerCell: number;
         updatedAt: Date;
     }>;
     listWarehouses(): Promise<{
         id: string;
+        createdAt: Date;
         title: string;
         address: string;
         description: string | null;
@@ -26,12 +27,12 @@ export declare class WarehousesController {
         cellSquare: number;
         gridRows: number;
         gridCols: number;
-        price: number;
-        createdAt: Date;
+        pricePerCell: number;
         updatedAt: Date;
     }[]>;
     getWarehouse(id: string): Promise<{
         id: string;
+        createdAt: Date;
         title: string;
         address: string;
         description: string | null;
@@ -39,12 +40,12 @@ export declare class WarehousesController {
         cellSquare: number;
         gridRows: number;
         gridCols: number;
-        price: number;
-        createdAt: Date;
+        pricePerCell: number;
         updatedAt: Date;
     }>;
     updateWarehouse(id: string, body: UpdateWarehouseDto): Promise<{
         id: string;
+        createdAt: Date;
         title: string;
         address: string;
         description: string | null;
@@ -52,12 +53,12 @@ export declare class WarehousesController {
         cellSquare: number;
         gridRows: number;
         gridCols: number;
-        price: number;
-        createdAt: Date;
+        pricePerCell: number;
         updatedAt: Date;
     }>;
     deleteWarehouse(id: string): Promise<{
         id: string;
+        createdAt: Date;
         title: string;
         address: string;
         description: string | null;
@@ -65,8 +66,7 @@ export declare class WarehousesController {
         cellSquare: number;
         gridRows: number;
         gridCols: number;
-        price: number;
-        createdAt: Date;
+        pricePerCell: number;
         updatedAt: Date;
     }>;
 }
