@@ -17,6 +17,10 @@ export declare class RentalsService {
         extraContactEmail?: string;
     }): Promise<{
         id: string;
+        createdAt: Date;
+        pricePerCell: number;
+        warehouseId: string;
+        userId: string;
         startDate: Date;
         endDate: Date;
         autoRenew: boolean;
@@ -26,20 +30,20 @@ export declare class RentalsService {
         colEnd: number;
         totalCells: number;
         areaSquare: number;
-        pricePerCell: number;
         totalPrice: number;
         extraContactName: string | null;
         extraContactEmail: string | null;
-        createdAt: Date;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
-        warehouseId: string;
-        userId: string;
     }>;
     listRentals(params: {
         warehouseId?: string;
         userId?: string;
     }): Promise<{
         id: string;
+        createdAt: Date;
+        pricePerCell: number;
+        warehouseId: string;
+        userId: string;
         startDate: Date;
         endDate: Date;
         autoRenew: boolean;
@@ -49,17 +53,17 @@ export declare class RentalsService {
         colEnd: number;
         totalCells: number;
         areaSquare: number;
-        pricePerCell: number;
         totalPrice: number;
         extraContactName: string | null;
         extraContactEmail: string | null;
-        createdAt: Date;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
-        warehouseId: string;
-        userId: string;
     }[]>;
     getRental(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        pricePerCell: number;
+        warehouseId: string;
+        userId: string;
         startDate: Date;
         endDate: Date;
         autoRenew: boolean;
@@ -69,14 +73,10 @@ export declare class RentalsService {
         colEnd: number;
         totalCells: number;
         areaSquare: number;
-        pricePerCell: number;
         totalPrice: number;
         extraContactName: string | null;
         extraContactEmail: string | null;
-        createdAt: Date;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
-        warehouseId: string;
-        userId: string;
     }>;
     updateRental(id: string, input: {
         warehouseId?: string;
@@ -93,6 +93,10 @@ export declare class RentalsService {
         rentalStatus?: RentalStatusType;
     }): Promise<{
         id: string;
+        createdAt: Date;
+        pricePerCell: number;
+        warehouseId: string;
+        userId: string;
         startDate: Date;
         endDate: Date;
         autoRenew: boolean;
@@ -102,17 +106,17 @@ export declare class RentalsService {
         colEnd: number;
         totalCells: number;
         areaSquare: number;
-        pricePerCell: number;
         totalPrice: number;
         extraContactName: string | null;
         extraContactEmail: string | null;
-        createdAt: Date;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
-        warehouseId: string;
-        userId: string;
     }>;
     deleteRental(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        pricePerCell: number;
+        warehouseId: string;
+        userId: string;
         startDate: Date;
         endDate: Date;
         autoRenew: boolean;
@@ -122,14 +126,10 @@ export declare class RentalsService {
         colEnd: number;
         totalCells: number;
         areaSquare: number;
-        pricePerCell: number;
         totalPrice: number;
         extraContactName: string | null;
         extraContactEmail: string | null;
-        createdAt: Date;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
-        warehouseId: string;
-        userId: string;
     }>;
     private getWarehouse;
     private assertGridBounds;

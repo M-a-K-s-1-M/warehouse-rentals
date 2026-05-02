@@ -13,11 +13,18 @@ exports.ApplicationsService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
+const common_2 = require("@nestjs/common");
 let ApplicationsService = class ApplicationsService {
     prisma;
     constructor(prisma) {
         this.prisma = prisma;
     }
+    engineerSelect = {
+        id: true,
+        email: true,
+        role: true,
+        createdAt: true,
+    };
     async createApplication(input) {
         return this.prisma.application.create({
             data: {
@@ -51,18 +58,33 @@ let ApplicationsService = class ApplicationsService {
         });
     }
     async getApplicationById(id) {
-        return this.prisma.application.findUnique({
+        const application = await this.prisma.application.findUnique({
             where: { id },
             include: {
                 photos: true,
                 user: true,
                 warehouse: true,
+                engineers: {
+                    include: {
+                        engineer: {
+                            select: this.engineerSelect,
+                        },
+                    },
+                    orderBy: {
+                        assignedAt: "desc",
+                    },
+                },
             },
         });
+        if (!application) {
+            throw new common_2.NotFoundException("Заявка не найдена");
+        }
+        return application;
     }
     async listApplications(params) {
         const where = {
             status: params.status,
+            openStatus: params.openStatus,
             userId: params.userId,
             warehouseId: params.warehouseId,
         };
@@ -70,9 +92,86 @@ let ApplicationsService = class ApplicationsService {
             where,
             include: {
                 photos: true,
+                engineers: {
+                    include: {
+                        engineer: {
+                            select: this.engineerSelect,
+                        },
+                    },
+                    orderBy: {
+                        assignedAt: "desc",
+                    },
+                },
             },
             orderBy: {
                 createdAt: "desc",
+            },
+        });
+    }
+    async updateStatus(id, status) {
+        await this.getApplicationById(id);
+        return this.prisma.application.update({
+            where: { id },
+            data: { status },
+        });
+    }
+    async updateOpenStatus(id, openStatus) {
+        await this.getApplicationById(id);
+        return this.prisma.application.update({
+            where: { id },
+            data: { openStatus },
+        });
+    }
+    async assignEngineers(input) {
+        const application = await this.getApplicationById(input.applicationId);
+        const uniqueEngineerIds = Array.from(new Set(input.engineerIds));
+        if (uniqueEngineerIds.length === 0) {
+            return this.prisma.application.update({
+                where: { id: application.id },
+                data: {
+                    engineers: {
+                        deleteMany: {},
+                    },
+                },
+                include: {
+                    engineers: {
+                        include: {
+                            engineer: {
+                                select: this.engineerSelect,
+                            },
+                        },
+                    },
+                },
+            });
+        }
+        const engineers = await this.prisma.user.findMany({
+            where: {
+                id: { in: uniqueEngineerIds },
+                role: client_1.RoleType.ENGINEER,
+            },
+            select: { id: true },
+        });
+        if (engineers.length !== uniqueEngineerIds.length) {
+            throw new common_2.BadRequestException("Можно назначать только инженеров");
+        }
+        return this.prisma.application.update({
+            where: { id: application.id },
+            data: {
+                engineers: {
+                    deleteMany: {},
+                    create: uniqueEngineerIds.map((engineerId) => ({
+                        engineerId,
+                    })),
+                },
+            },
+            include: {
+                engineers: {
+                    include: {
+                        engineer: {
+                            select: this.engineerSelect,
+                        },
+                    },
+                },
             },
         });
     }
