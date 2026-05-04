@@ -1,8 +1,8 @@
 'use client';
 
+import { CreateWarehouseButton, DeleteWarehouseButton } from "@/components";
 import { WarehousesApi } from "@/lib";
 import {
-    ActionIcon,
     Button,
     Group,
     Modal,
@@ -16,7 +16,6 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, Trash2Icon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -210,12 +209,7 @@ export function ListWarehouses() {
                         w={260}
                     />
 
-                    <Button
-                        leftSection={<PlusIcon size={16} />}
-                        onClick={() => setIsCreateModalOpen(true)}
-                    >
-                        Создать склад
-                    </Button>
+                    <CreateWarehouseButton onClick={() => setIsCreateModalOpen(true)} />
                 </Group>
 
                 <Text c="dimmed" size="sm" className="hidden xs:block">
@@ -451,18 +445,10 @@ export function ListWarehouses() {
                                 <p className="text-base text-gray-600 font-semibold truncate ">#{warehouse.id}</p>
 
 
-                                <ActionIcon
-                                    variant="subtle"
-                                    color="red"
+                                <DeleteWarehouseButton
                                     className="absolute right-3 top-3"
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        event.preventDefault();
-                                        setDeleteTargetId(warehouse.id);
-                                    }}
-                                >
-                                    <Trash2Icon size={18} />
-                                </ActionIcon>
+                                    onClick={() => setDeleteTargetId(warehouse.id)}
+                                />
                             </div>
 
                             <h3 className="text-lg font-semibold">{warehouse.title}</h3>
