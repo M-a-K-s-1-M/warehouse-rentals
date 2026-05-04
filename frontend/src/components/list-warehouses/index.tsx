@@ -85,7 +85,18 @@ export function ListWarehouses() {
                         <li
                             key={warehouse.id}
                             className="relative border-2 border-gray-300 p-4 bg-white cursor-pointer duration-200 hover:scale-103"
-                            onClick={() => router.push(`/${warehouse.id}`)}
+                            onClick={(event) => {
+                                if (event.defaultPrevented) {
+                                    return;
+                                }
+
+                                const target = event.target as HTMLElement | null;
+                                if (target?.closest("button")) {
+                                    return;
+                                }
+
+                                router.push(`/${warehouse.id}`);
+                            }}
                         >
                             <div className="flex items-start justify-between gap-3 mb-3">
                                 <p className="text-base text-gray-600 font-semibold truncate ">#{warehouse.id}</p>
