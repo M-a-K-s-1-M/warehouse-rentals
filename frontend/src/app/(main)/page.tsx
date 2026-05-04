@@ -1,6 +1,12 @@
 'use client'
+
+import { ListWarehouses } from "@/components"
+
 export default function MainPage() {
     return (
-        <div>MainPage</div>
+        <div className="p-8">
+            <ListWarehouses />
+
+        </div>
     )
 }

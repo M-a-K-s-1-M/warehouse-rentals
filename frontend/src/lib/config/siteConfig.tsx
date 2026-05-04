@@ -1,4 +1,4 @@
-import { BarChartIcon, ChartAreaIcon, DrillIcon, FileTextIcon, HammerIcon, HousePlusIcon, NewspaperIcon, SettingsIcon, UsersIcon, WrenchIcon } from "lucide-react";
+import { ChartAreaIcon, HammerIcon, HousePlusIcon, NewspaperIcon, SettingsIcon, UsersIcon, } from "lucide-react";
 
 export interface ISiteConfig {
     name: string;
@@ -39,7 +39,7 @@ export const siteConfig: ISiteConfig = {
 
     navLinks: {
         MANAGER: [
-            { name: 'Субъекты', href: '/', icon: HousePlusIcon },
+            { name: 'Объекты', href: '/', icon: HousePlusIcon },
             { name: 'Арендаторы', href: '/tenants', icon: UsersIcon },
             { name: 'Инженеры', href: '/engineers', icon: HammerIcon },
             { name: 'Заявки', href: '/applications', icon: NewspaperIcon },

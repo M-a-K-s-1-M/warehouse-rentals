@@ -1,6 +1,7 @@
 'use client';
 
 import { siteConfig } from "@/lib";
+import { notifications } from "@mantine/notifications";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -8,7 +9,6 @@ import { usePathname } from "next/navigation";
 export function MainSidebar() {
     const role = 'MANAGER';
     const pathname = usePathname();
-    console.log(pathname);
 
     interface IIconProps {
         size?: number | string;
@@ -34,7 +34,7 @@ export function MainSidebar() {
                                     {Icon ? <Icon size={22} className="inline-block" /> : null}
                                 </div>
 
-                                <p className="text-base font-normal">
+                                <p className={`text-base font-normal ${isActive ? 'font-semibold' : ''}`}>
                                     {link.name}
                                 </p>
                             </Link>

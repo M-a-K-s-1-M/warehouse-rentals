@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import {
-  ColorSchemeScript,
+  // ColorSchemeScript,
   mantineHtmlProps,
   MantineProvider,
 } from "@mantine/core";
 import theme from "./theme";
 import "./globals.css";
+import { Notifications } from "@mantine/notifications";
+import { QueryProvider } from "@/components";
 
 export const metadata: Metadata = {
   title: "Next App Mantine Tailwind Template",
@@ -19,11 +21,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" {...mantineHtmlProps}>
-      <head>
+      {/* <head>
         <ColorSchemeScript />
-      </head>
+      </head> */}
       <body className="antialiased">
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          <Notifications />
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+        </MantineProvider>
       </body>
     </html>
   );

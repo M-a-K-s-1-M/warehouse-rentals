@@ -5,11 +5,10 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 @import "@mantine/core/styles.layer.css";
+@import '@mantine/notifications/styles.css';
 
-@custom-variant dark (&:where(
-		[data-mantine-color-scheme="dark"],
-		[data-mantine-color-scheme="dark"] *
-	));
+@custom-variant dark (&:where([data-mantine-color-scheme="dark"],
+		[data-mantine-color-scheme="dark"] *));
 
 @theme inline {
 	/* font */

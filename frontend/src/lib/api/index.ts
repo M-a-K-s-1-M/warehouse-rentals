@@ -1,0 +1,1 @@
+export { WarehousesApi } from "./warehousesApi";

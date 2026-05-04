@@ -10,7 +10,6 @@ import {
     AppShellNavbar,
     Burger,
     Group,
-    Title,
 } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -45,6 +44,8 @@ export default function MainPageLayout({ children }: { children: React.ReactNode
                     </ActionIcon>
 
                     <h2 className="text-xl font-semibold">{siteConfig.name}</h2>
+
+                    <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" className="ml-auto" />
                 </div>
 
                 <MainSidebar />
