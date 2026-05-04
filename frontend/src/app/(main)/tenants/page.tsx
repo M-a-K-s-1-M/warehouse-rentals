@@ -1,7 +1,10 @@
 'use client'
 
 export default function TenantsPage() {
+
     return (
-        <div>TenantsPage</div>
+        <div>
+            TenantsPage
+        </div>
     )
 }
