@@ -7,7 +7,7 @@ export class RentalsService {
     constructor(private readonly prisma: PrismaService) { }
 
     async createRental(input: {
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -58,7 +58,7 @@ export class RentalsService {
         });
     }
 
-    async listRentals(params: { warehouseId?: string; userId?: string }) {
+    async listRentals(params: { warehouseId?: number; userId?: string }) {
         return this.prisma.rental.findMany({
             where: {
                 warehouseId: params.warehouseId,
@@ -79,7 +79,7 @@ export class RentalsService {
     async updateRental(
         id: string,
         input: {
-            warehouseId?: string;
+            warehouseId?: number;
             userId?: string;
             startDate?: Date;
             endDate?: Date;
@@ -166,7 +166,7 @@ export class RentalsService {
         return this.prisma.rental.delete({ where: { id } });
     }
 
-    private async getWarehouse(id: string) {
+    private async getWarehouse(id: number) {
         const warehouse = await this.prisma.warehouse.findUnique({ where: { id } });
         if (!warehouse) {
             throw new NotFoundException("Склад не найден");
@@ -220,7 +220,7 @@ export class RentalsService {
     }
 
     private async assertNoOverlap(input: {
-        warehouseId: string;
+        warehouseId: number;
         startDate: Date;
         endDate: Date;
         rowStart: number;

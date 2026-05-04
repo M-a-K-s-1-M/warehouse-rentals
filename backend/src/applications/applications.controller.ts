@@ -9,6 +9,7 @@ import {
     Query,
     Req,
     UseGuards,
+    ParseIntPipe,
 } from "@nestjs/common";
 import { ApplicationOpenStatus, ApplicationStatus, RoleType } from "@prisma/client";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -48,7 +49,7 @@ export class ApplicationsController {
         @Query("status") status?: ApplicationStatus,
         @Query("openStatus") openStatus?: ApplicationOpenStatus,
         @Query("userId") userId?: string,
-        @Query("warehouseId") warehouseId?: string,
+        @Query("warehouseId", ParseIntPipe) warehouseId?: number,
     ) {
         return this.applicationsService.listApplications({ status, openStatus, userId, warehouseId });
     }

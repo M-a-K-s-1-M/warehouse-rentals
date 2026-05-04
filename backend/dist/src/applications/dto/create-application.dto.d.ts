@@ -1,5 +1,5 @@
 export declare class CreateApplicationDto {
-    warehouseId: string;
+    warehouseId: number;
     description: string;
     userId?: string;
 }

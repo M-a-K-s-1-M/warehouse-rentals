@@ -10,8 +10,9 @@ import {
 } from "class-validator";
 
 export class CreateRentalDto {
-    @IsUUID()
-    warehouseId: string;
+    @IsInt()
+    @IsPositive()
+    warehouseId: number;
 
     @IsUUID()
     userId: string;

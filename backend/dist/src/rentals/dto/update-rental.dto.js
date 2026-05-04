@@ -29,8 +29,9 @@ class UpdateRentalDto {
 exports.UpdateRentalDto = UpdateRentalDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
 ], UpdateRentalDto.prototype, "warehouseId", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),

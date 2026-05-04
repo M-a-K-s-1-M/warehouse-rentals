@@ -1,6 +1,6 @@
 import { RentalStatusType } from "@prisma/client";
 export declare class UpdateRentalDto {
-    warehouseId?: string;
+    warehouseId?: number;
     userId?: string;
     startDate?: string;
     endDate?: string;

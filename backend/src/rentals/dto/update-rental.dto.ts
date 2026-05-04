@@ -13,8 +13,9 @@ import { RentalStatusType } from "@prisma/client";
 
 export class UpdateRentalDto {
     @IsOptional()
-    @IsUUID()
-    warehouseId?: string;
+    @IsInt()
+    @IsPositive()
+    warehouseId?: number;
 
     @IsOptional()
     @IsUUID()

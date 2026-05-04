@@ -60,10 +60,10 @@ __decorate([
 ], RentalsController.prototype, "createRental", null);
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)("warehouseId")),
+    __param(0, (0, common_1.Query)("warehouseId", common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)("userId")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", Promise)
 ], RentalsController.prototype, "listRentals", null);
 __decorate([

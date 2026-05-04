@@ -1,8 +1,9 @@
-import { IsOptional, IsString, IsUUID } from "class-validator";
+import { IsInt, IsOptional, IsPositive, IsString, IsUUID } from "class-validator";
 
 export class CreateApplicationDto {
-    @IsUUID()
-    warehouseId: string;
+    @IsInt()
+    @IsPositive()
+    warehouseId: number;
 
     @IsString()
     description: string;

@@ -8,7 +8,7 @@ export declare class RentalsController {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -24,11 +24,11 @@ export declare class RentalsController {
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
     }>;
-    listRentals(warehouseId?: string, userId?: string): Promise<{
+    listRentals(warehouseId?: number, userId?: string): Promise<{
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -48,7 +48,7 @@ export declare class RentalsController {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -68,7 +68,7 @@ export declare class RentalsController {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -88,7 +88,7 @@ export declare class RentalsController {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;

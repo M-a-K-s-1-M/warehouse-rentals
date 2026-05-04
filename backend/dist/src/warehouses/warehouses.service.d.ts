@@ -10,7 +10,7 @@ export declare class WarehousesService {
         cellSquare: number;
         pricePerCell: number;
     }): Promise<{
-        id: string;
+        id: number;
         createdAt: Date;
         title: string;
         address: string;
@@ -22,8 +22,8 @@ export declare class WarehousesService {
         pricePerCell: number;
         updatedAt: Date;
     }>;
-    listWarehouses(): Promise<{
-        id: string;
+    listWarehouses(squareOrder?: "asc" | "desc"): Promise<{
+        id: number;
         createdAt: Date;
         title: string;
         address: string;
@@ -35,8 +35,8 @@ export declare class WarehousesService {
         pricePerCell: number;
         updatedAt: Date;
     }[]>;
-    getWarehouse(id: string): Promise<{
-        id: string;
+    getWarehouse(id: number): Promise<{
+        id: number;
         createdAt: Date;
         title: string;
         address: string;
@@ -48,7 +48,7 @@ export declare class WarehousesService {
         pricePerCell: number;
         updatedAt: Date;
     }>;
-    updateWarehouse(id: string, input: {
+    updateWarehouse(id: number, input: {
         title?: string;
         address?: string;
         description?: string;
@@ -56,7 +56,7 @@ export declare class WarehousesService {
         cellSquare?: number;
         pricePerCell?: number;
     }): Promise<{
-        id: string;
+        id: number;
         createdAt: Date;
         title: string;
         address: string;
@@ -68,8 +68,8 @@ export declare class WarehousesService {
         pricePerCell: number;
         updatedAt: Date;
     }>;
-    deleteWarehouse(id: string): Promise<{
-        id: string;
+    deleteWarehouse(id: number): Promise<{
+        id: number;
         createdAt: Date;
         title: string;
         address: string;

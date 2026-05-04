@@ -8,6 +8,7 @@ import {
     Post,
     Query,
     UseGuards,
+    ParseIntPipe,
 } from "@nestjs/common";
 import { RoleType } from "@prisma/client";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -33,7 +34,10 @@ export class RentalsController {
     }
 
     @Get()
-    async listRentals(@Query("warehouseId") warehouseId?: string, @Query("userId") userId?: string) {
+    async listRentals(
+        @Query("warehouseId", ParseIntPipe) warehouseId?: number,
+        @Query("userId") userId?: string,
+    ) {
         return this.rentalsService.listRentals({ warehouseId, userId });
     }
 

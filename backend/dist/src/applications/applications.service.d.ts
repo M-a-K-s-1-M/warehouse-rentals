@@ -5,7 +5,7 @@ export declare class ApplicationsService {
     constructor(prisma: PrismaService);
     private readonly engineerSelect;
     createApplication(input: {
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         description: string;
         status?: ApplicationStatus;
@@ -27,7 +27,7 @@ export declare class ApplicationsService {
         id: string;
         createdAt: Date;
         description: string;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
@@ -54,7 +54,7 @@ export declare class ApplicationsService {
             role: import("@prisma/client").$Enums.RoleType;
         };
         warehouse: {
-            id: string;
+            id: number;
             createdAt: Date;
             title: string;
             address: string;
@@ -90,7 +90,7 @@ export declare class ApplicationsService {
         id: string;
         createdAt: Date;
         description: string;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
@@ -99,7 +99,7 @@ export declare class ApplicationsService {
         status?: ApplicationStatus;
         openStatus?: ApplicationOpenStatus;
         userId?: string;
-        warehouseId?: string;
+        warehouseId?: number;
     }): Promise<({
         photos: {
             url: string;
@@ -125,7 +125,7 @@ export declare class ApplicationsService {
         id: string;
         createdAt: Date;
         description: string;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
@@ -134,7 +134,7 @@ export declare class ApplicationsService {
         id: string;
         createdAt: Date;
         description: string;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
@@ -143,7 +143,7 @@ export declare class ApplicationsService {
         id: string;
         createdAt: Date;
         description: string;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
@@ -168,7 +168,7 @@ export declare class ApplicationsService {
         id: string;
         createdAt: Date;
         description: string;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;

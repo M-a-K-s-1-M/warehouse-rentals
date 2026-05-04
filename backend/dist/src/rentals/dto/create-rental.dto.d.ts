@@ -1,5 +1,5 @@
 export declare class CreateRentalDto {
-    warehouseId: string;
+    warehouseId: number;
     userId: string;
     startDate: string;
     endDate: string;

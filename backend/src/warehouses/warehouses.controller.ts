@@ -6,6 +6,8 @@ import {
     Param,
     Patch,
     Post,
+    Query,
+    ParseIntPipe,
     UseGuards,
 } from "@nestjs/common";
 import { RoleType } from "@prisma/client";
@@ -17,8 +19,8 @@ import { UpdateWarehouseDto } from "./dto/update-warehouse.dto";
 import { WarehousesService } from "./warehouses.service";
 
 @Controller("warehouses")
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RoleType.MANAGER)
+// @UseGuards(JwtAuthGuard, RolesGuard)
+// @Roles(RoleType.MANAGER)
 export class WarehousesController {
     constructor(private readonly warehousesService: WarehousesService) { }
 
@@ -28,22 +30,22 @@ export class WarehousesController {
     }
 
     @Get()
-    async listWarehouses() {
-        return this.warehousesService.listWarehouses();
+    async listWarehouses(@Query("squareOrder") squareOrder?: "asc" | "desc") {
+        return this.warehousesService.listWarehouses(squareOrder);
     }
 
     @Get(":id")
-    async getWarehouse(@Param("id") id: string) {
+    async getWarehouse(@Param("id", ParseIntPipe) id: number) {
         return this.warehousesService.getWarehouse(id);
     }
 
     @Patch(":id")
-    async updateWarehouse(@Param("id") id: string, @Body() body: UpdateWarehouseDto) {
+    async updateWarehouse(@Param("id", ParseIntPipe) id: number, @Body() body: UpdateWarehouseDto) {
         return this.warehousesService.updateWarehouse(id, body);
     }
 
     @Delete(":id")
-    async deleteWarehouse(@Param("id") id: string) {
+    async deleteWarehouse(@Param("id", ParseIntPipe) id: number) {
         return this.warehousesService.deleteWarehouse(id);
     }
 }

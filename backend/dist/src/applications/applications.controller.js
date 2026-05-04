@@ -75,9 +75,9 @@ __decorate([
     __param(0, (0, common_1.Query)("status")),
     __param(1, (0, common_1.Query)("openStatus")),
     __param(2, (0, common_1.Query)("userId")),
-    __param(3, (0, common_1.Query)("warehouseId")),
+    __param(3, (0, common_1.Query)("warehouseId", common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, Number]),
     __metadata("design:returntype", Promise)
 ], ApplicationsController.prototype, "listApplications", null);
 __decorate([

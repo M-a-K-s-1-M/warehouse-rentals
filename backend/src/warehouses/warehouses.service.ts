@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -29,13 +30,16 @@ export class WarehousesService {
         });
     }
 
-    async listWarehouses() {
+    async listWarehouses(squareOrder?: "asc" | "desc") {
+        const orderBy: Prisma.WarehouseOrderByWithRelationInput = squareOrder
+            ? { square: squareOrder === "asc" ? Prisma.SortOrder.asc : Prisma.SortOrder.desc }
+            : { createdAt: Prisma.SortOrder.desc };
         return this.prisma.warehouse.findMany({
-            orderBy: { createdAt: "desc" },
+            orderBy,
         });
     }
 
-    async getWarehouse(id: string) {
+    async getWarehouse(id: number) {
         const warehouse = await this.prisma.warehouse.findUnique({ where: { id } });
         if (!warehouse) {
             throw new NotFoundException("Warehouse not found");
@@ -44,7 +48,7 @@ export class WarehousesService {
     }
 
     async updateWarehouse(
-        id: string,
+        id: number,
         input: {
             title?: string;
             address?: string;
@@ -75,7 +79,7 @@ export class WarehousesService {
         });
     }
 
-    async deleteWarehouse(id: string) {
+    async deleteWarehouse(id: number) {
         await this.getWarehouse(id);
         return this.prisma.warehouse.delete({ where: { id } });
     }

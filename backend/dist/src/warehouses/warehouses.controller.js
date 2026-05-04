@@ -14,10 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WarehousesController = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require("@prisma/client");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
-const roles_decorator_1 = require("../auth/decorators/roles.decorator");
-const roles_guard_1 = require("../auth/guards/roles.guard");
 const create_warehouse_dto_1 = require("./dto/create-warehouse.dto");
 const update_warehouse_dto_1 = require("./dto/update-warehouse.dto");
 const warehouses_service_1 = require("./warehouses.service");
@@ -29,8 +25,8 @@ let WarehousesController = class WarehousesController {
     async createWarehouse(body) {
         return this.warehousesService.createWarehouse(body);
     }
-    async listWarehouses() {
-        return this.warehousesService.listWarehouses();
+    async listWarehouses(squareOrder) {
+        return this.warehousesService.listWarehouses(squareOrder);
     }
     async getWarehouse(id) {
         return this.warehousesService.getWarehouse(id);
@@ -52,36 +48,35 @@ __decorate([
 ], WarehousesController.prototype, "createWarehouse", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)("squareOrder")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], WarehousesController.prototype, "listWarehouses", null);
 __decorate([
     (0, common_1.Get)(":id"),
-    __param(0, (0, common_1.Param)("id")),
+    __param(0, (0, common_1.Param)("id", common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WarehousesController.prototype, "getWarehouse", null);
 __decorate([
     (0, common_1.Patch)(":id"),
-    __param(0, (0, common_1.Param)("id")),
+    __param(0, (0, common_1.Param)("id", common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_warehouse_dto_1.UpdateWarehouseDto]),
+    __metadata("design:paramtypes", [Number, update_warehouse_dto_1.UpdateWarehouseDto]),
     __metadata("design:returntype", Promise)
 ], WarehousesController.prototype, "updateWarehouse", null);
 __decorate([
     (0, common_1.Delete)(":id"),
-    __param(0, (0, common_1.Param)("id")),
+    __param(0, (0, common_1.Param)("id", common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WarehousesController.prototype, "deleteWarehouse", null);
 exports.WarehousesController = WarehousesController = __decorate([
     (0, common_1.Controller)("warehouses"),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER),
     __metadata("design:paramtypes", [warehouses_service_1.WarehousesService])
 ], WarehousesController);
 //# sourceMappingURL=warehouses.controller.js.map

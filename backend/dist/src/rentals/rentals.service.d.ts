@@ -4,7 +4,7 @@ export declare class RentalsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     createRental(input: {
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -19,7 +19,7 @@ export declare class RentalsService {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -36,13 +36,13 @@ export declare class RentalsService {
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
     }>;
     listRentals(params: {
-        warehouseId?: string;
+        warehouseId?: number;
         userId?: string;
     }): Promise<{
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -62,7 +62,7 @@ export declare class RentalsService {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -79,7 +79,7 @@ export declare class RentalsService {
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
     }>;
     updateRental(id: string, input: {
-        warehouseId?: string;
+        warehouseId?: number;
         userId?: string;
         startDate?: Date;
         endDate?: Date;
@@ -95,7 +95,7 @@ export declare class RentalsService {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;
@@ -115,7 +115,7 @@ export declare class RentalsService {
         id: string;
         createdAt: Date;
         pricePerCell: number;
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         startDate: Date;
         endDate: Date;

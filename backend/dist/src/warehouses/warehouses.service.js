@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WarehousesService = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
 let WarehousesService = class WarehousesService {
     prisma;
@@ -32,9 +33,12 @@ let WarehousesService = class WarehousesService {
             },
         });
     }
-    async listWarehouses() {
+    async listWarehouses(squareOrder) {
+        const orderBy = squareOrder
+            ? { square: squareOrder === "asc" ? client_1.Prisma.SortOrder.asc : client_1.Prisma.SortOrder.desc }
+            : { createdAt: client_1.Prisma.SortOrder.desc };
         return this.prisma.warehouse.findMany({
-            orderBy: { createdAt: "desc" },
+            orderBy,
         });
     }
     async getWarehouse(id) {

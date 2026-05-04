@@ -21,7 +21,7 @@ export class ApplicationsService {
     };
 
     async createApplication(input: {
-        warehouseId: string;
+        warehouseId: number;
         userId: string;
         description: string;
         status?: ApplicationStatus;
@@ -98,7 +98,7 @@ export class ApplicationsService {
         status?: ApplicationStatus;
         openStatus?: ApplicationOpenStatus;
         userId?: string;
-        warehouseId?: string;
+        warehouseId?: number;
     }) {
         const where: Prisma.ApplicationWhereInput = {
             status: params.status,
