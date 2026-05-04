@@ -18,7 +18,7 @@ import { notifications } from "@mantine/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 type CreateWarehouseForm = {
@@ -41,6 +41,8 @@ export function ListWarehouses() {
     const {
         control,
         handleSubmit,
+        setValue,
+        watch,
         reset,
         formState: { errors },
     } = useForm<CreateWarehouseForm>({
@@ -53,6 +55,59 @@ export function ListWarehouses() {
             pricePerCell: undefined,
         },
     });
+
+    const squareValue = watch("square");
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const cellSquareCandidates = useMemo(() => {
+        if (!squareValue || squareValue <= 0) {
+            return [] as number[];
+        }
+
+        const candidates: number[] = [];
+        for (let value = 5; value <= 100; value += 5) {
+            if (squareValue % value === 0) {
+                candidates.push(value);
+            }
+        }
+
+        return candidates;
+    }, [squareValue]);
+
+    useEffect(() => {
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        if (!squareValue || squareValue <= 0) {
+            return;
+        }
+
+        debounceTimerRef.current = setTimeout(() => {
+            if (cellSquareCandidates.length === 0) {
+                return;
+            }
+
+            const current = watch("cellSquare") ?? cellSquareCandidates[0];
+            let closest = cellSquareCandidates[0];
+            let bestDiff = Math.abs(current - cellSquareCandidates[0]);
+
+            for (const candidate of cellSquareCandidates) {
+                const diff = Math.abs(current - candidate);
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    closest = candidate;
+                }
+            }
+
+            setValue("cellSquare", closest, { shouldValidate: true });
+        }, 600);
+
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, [squareValue, cellSquareCandidates, setValue, watch]);
 
     const squareOrderParam = searchParams.get("squareOrder");
     const squareOrder = squareOrderParam === "asc" || squareOrderParam === "desc"
@@ -163,7 +218,7 @@ export function ListWarehouses() {
                     </Button>
                 </Group>
 
-                <Text c="dimmed" size="sm">
+                <Text c="dimmed" size="sm" className="hidden xs:block">
                     {sortedWarehouses.length} склад(ов)
                 </Text>
             </div>
@@ -263,17 +318,39 @@ export function ListWarehouses() {
                                 </Text>
                                 <Slider
                                     value={field.value ?? 5}
-                                    onChange={field.onChange}
+                                    onChange={(value) => {
+                                        if (cellSquareCandidates.length === 0) {
+                                            field.onChange(value);
+                                            return;
+                                        }
+
+                                        let closest = cellSquareCandidates[0];
+                                        let bestDiff = Math.abs(value - closest);
+                                        for (const candidate of cellSquareCandidates) {
+                                            const diff = Math.abs(value - candidate);
+                                            if (diff < bestDiff) {
+                                                bestDiff = diff;
+                                                closest = candidate;
+                                            }
+                                        }
+
+                                        field.onChange(closest);
+                                    }}
                                     min={5}
                                     max={100}
                                     step={5}
-                                    marks={[
-                                        { value: 5, label: "5" },
-                                        { value: 25, label: "25" },
-                                        { value: 50, label: "50" },
-                                        { value: 75, label: "75" },
-                                        { value: 100, label: "100" },
-                                    ]}
+                                    marks={cellSquareCandidates.length
+                                        ? cellSquareCandidates.map((value) => ({
+                                            value,
+                                            label: String(value),
+                                        }))
+                                        : [
+                                            { value: 5, label: "5" },
+                                            { value: 25, label: "25" },
+                                            { value: 50, label: "50" },
+                                            { value: 75, label: "75" },
+                                            { value: 100, label: "100" },
+                                        ]}
                                 />
                                 {errors.cellSquare?.message && (
                                     <Text size="xs" c="red" mt={4}>
@@ -365,24 +442,28 @@ export function ListWarehouses() {
                         </li>
                     ))
                     : sortedWarehouses.map((warehouse) => (
-                        <li key={warehouse.id} className="relative border-2 border-gray-300 p-4 bg-white cursor-pointer duration-200 hover:scale-103">
+                        <li
+                            key={warehouse.id}
+                            className="relative border-2 border-gray-300 p-4 bg-white cursor-pointer duration-200 hover:scale-103"
+                            onClick={() => router.push(`/${warehouse.id}`)}
+                        >
                             <div className="flex items-start justify-between gap-3 mb-3">
                                 <p className="text-base text-gray-600 font-semibold truncate ">#{warehouse.id}</p>
 
-                                <p className={`p-1 h-1 w-1 rounded-full ${warehouse.address ? 'bg-green-500' : 'bg-orange-500'}`}></p>
-                            </div>
 
-                            <ActionIcon
-                                variant="subtle"
-                                color="red"
-                                className="absolute right-3 top-3"
-                                onClick={(event) => {
-                                    event.preventDefault();
-                                    setDeleteTargetId(warehouse.id);
-                                }}
-                            >
-                                <Trash2Icon size={18} />
-                            </ActionIcon>
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="red"
+                                    className="absolute right-3 top-3"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        event.preventDefault();
+                                        setDeleteTargetId(warehouse.id);
+                                    }}
+                                >
+                                    <Trash2Icon size={18} />
+                                </ActionIcon>
+                            </div>
 
                             <h3 className="text-lg font-semibold">{warehouse.title}</h3>
                             <p className="text-base text-gray-600 mb-3">{warehouse.address}</p>
