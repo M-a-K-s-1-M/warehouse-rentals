@@ -42,7 +42,7 @@ export function ListWarehouses() {
             <div className="mb-4 flex items-center justify-between gap-3">
                 <Group align="flex-end" gap="md">
                     <Select
-                        label="Сортировка по площади"
+                        label="Сортировка"
                         placeholder="Выберите порядок"
                         value={squareOrder}
                         onChange={handleSquareOrderChange}
