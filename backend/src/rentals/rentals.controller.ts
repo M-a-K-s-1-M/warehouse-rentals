@@ -9,6 +9,7 @@ import {
     Query,
     UseGuards,
     ParseIntPipe,
+    BadRequestException,
 } from "@nestjs/common";
 import { RoleType } from "@prisma/client";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -35,10 +36,18 @@ export class RentalsController {
 
     @Get()
     async listRentals(
-        @Query("warehouseId", ParseIntPipe) warehouseId?: number,
+        @Query("warehouseId") warehouseId?: string,
         @Query("userId") userId?: string,
     ) {
-        return this.rentalsService.listRentals({ warehouseId, userId });
+        const parsedWarehouseId = warehouseId ? Number(warehouseId) : undefined;
+        if (warehouseId && !Number.isFinite(parsedWarehouseId)) {
+            throw new BadRequestException("warehouseId must be a number");
+        }
+
+        return this.rentalsService.listRentals({
+            warehouseId: parsedWarehouseId,
+            userId,
+        });
     }
 
     @Get(":id")

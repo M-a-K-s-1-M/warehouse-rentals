@@ -25,7 +25,7 @@ export declare class RentalsController {
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
     }>;
-    listRentals(warehouseId?: number, userId?: string): Promise<{
+    listRentals(warehouseId?: string, userId?: string): Promise<{
         id: string;
         createdAt: Date;
         pricePerCell: number;

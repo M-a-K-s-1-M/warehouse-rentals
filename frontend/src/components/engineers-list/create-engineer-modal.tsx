@@ -3,7 +3,7 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useEffect, useState } from "react";
 
-export type CreateTenantValues = {
+export type CreateEngineerValues = {
     lastName: string;
     firstName: string;
     middleName: string;
@@ -12,17 +12,17 @@ export type CreateTenantValues = {
     password: string;
 };
 
-type CreateTenantModalProps = {
+type CreateEngineerModalProps = {
     opened: boolean;
     onClose: () => void;
-    onSubmit: (values: CreateTenantValues) => void;
+    onSubmit: (values: CreateEngineerValues) => void;
     isSubmitting: boolean;
-    fieldErrors?: Partial<Record<keyof CreateTenantValues, string>>;
+    fieldErrors?: Partial<Record<keyof CreateEngineerValues, string>>;
     formError?: string | null;
-    onFieldChange?: (field: keyof CreateTenantValues) => void;
+    onFieldChange?: (field: keyof CreateEngineerValues) => void;
 };
 
-export function CreateTenantModal({
+export function CreateEngineerModal({
     opened,
     onClose,
     onSubmit,
@@ -30,8 +30,8 @@ export function CreateTenantModal({
     fieldErrors,
     formError,
     onFieldChange,
-}: CreateTenantModalProps) {
-    const [values, setValues] = useState<CreateTenantValues>({
+}: CreateEngineerModalProps) {
+    const [values, setValues] = useState<CreateEngineerValues>({
         lastName: "",
         firstName: "",
         middleName: "",
@@ -53,7 +53,7 @@ export function CreateTenantModal({
         }
     }, [opened]);
 
-    const handleChange = (field: keyof CreateTenantValues) =>
+    const handleChange = (field: keyof CreateEngineerValues) =>
         (value: string | React.ChangeEvent<HTMLInputElement> | null) => {
             const nextValue = typeof value === "string" ? value : value?.currentTarget?.value ?? "";
             setValues((prev) => ({ ...prev, [field]: nextValue }));
@@ -62,7 +62,6 @@ export function CreateTenantModal({
 
     const nameRegex = /^[А-Яа-яЁё\-\s]+$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneDigits = values.phone.replace(/\D/g, "");
     const phoneStrict = /^8\d{10}$/;
 
     const lastNameError = (values.lastName.trim() && !nameRegex.test(values.lastName)
@@ -74,9 +73,9 @@ export function CreateTenantModal({
     const middleNameError = (values.middleName.trim() && !nameRegex.test(values.middleName)
         ? "Только русские буквы"
         : null) ?? fieldErrors?.middleName ?? null;
-    const phoneError = values.phone.trim() && !phoneStrict.test(values.phone)
+    const phoneError = (values.phone.trim() && !phoneStrict.test(values.phone)
         ? "Телефон должен начинаться с 8 и содержать 11 цифр"
-        : null;
+        : null) ?? fieldErrors?.phone ?? null;
     const emailError = (values.email.trim() && !emailRegex.test(values.email)
         ? "Некорректная почта"
         : null) ?? fieldErrors?.email ?? null;
@@ -96,7 +95,7 @@ export function CreateTenantModal({
         && !emailError;
 
     return (
-        <Modal opened={opened} onClose={onClose} title="Добавить арендатора" centered>
+        <Modal opened={opened} onClose={onClose} title="Добавить инженера" centered>
             <div className="space-y-4">
                 <TextInput
                     label="Фамилия"
@@ -121,7 +120,7 @@ export function CreateTenantModal({
                 <TextInput
                     label="Телефон"
                     type="tel"
-                    placeholder="+7 (999) 123-45-67"
+                    placeholder="8XXXXXXXXXX"
                     value={values.phone}
                     onChange={handleChange("phone")}
                     error={phoneError}

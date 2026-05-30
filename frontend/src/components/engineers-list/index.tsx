@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { CreateTenantModal } from "@/components";
-import { RentalsApi, UsersApi, WarehousesApi } from "@/lib";
+import { CreateEngineerModal } from "@/components";
+import { ApplicationsApi, UsersApi, WarehousesApi } from "@/lib";
 import { Button, Select, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,15 +10,16 @@ import { useMemo, useState } from "react";
 
 type SortOrder = "desc" | "asc";
 
-function formatCurrency(value: number) {
+type EngineerErrors = Partial<Record<
+    "lastName" | "firstName" | "middleName" | "phone" | "email",
+    string
+>>;
+
+function formatCount(value: number) {
     return new Intl.NumberFormat("ru-RU").format(value);
 }
 
-function formatArea(value: number) {
-    return new Intl.NumberFormat("ru-RU").format(value);
-}
-
-function getTenantName(input: {
+function getEngineerName(input: {
     firstName?: string | null;
     lastName?: string | null;
     middleName?: string | null;
@@ -28,37 +29,30 @@ function getTenantName(input: {
     return parts.length ? parts.join(" ") : input.email;
 }
 
-function getStatusLabel(now: Date, rentals: { startDate: string; endDate: string }[]) {
-    const active = rentals.some((rental) => {
-        const start = new Date(rental.startDate);
-        const end = new Date(rental.endDate);
-        return start <= now && end >= now;
-    });
-
+function getStatusLabel(now: Date, applications: { status: string; openStatus: string; createdAt: string }[]) {
+    const active = applications.some((application) => application.openStatus === "OPEN");
     if (active) {
         return { label: "АКТИВЕН", color: "#DCFCE7", text: "#166534" };
     }
 
-    const upcoming = rentals.some((rental) => {
-        const end = new Date(rental.endDate);
-        return end >= now;
+    const recent = applications.some((application) => {
+        const created = new Date(application.createdAt);
+        const diff = now.getTime() - created.getTime();
+        return diff <= 1000 * 60 * 60 * 24 * 14;
     });
 
-    if (upcoming) {
-        return { label: "ИСТЕКАЕТ", color: "#FEF3C7", text: "#92400E" };
+    if (recent) {
+        return { label: "В ПРОЦЕССЕ", color: "#E0F2FE", text: "#0369A1" };
     }
 
     return { label: "НЕАКТИВЕН", color: "#F3F4F6", text: "#4B5563" };
 }
 
-export function TenantsList() {
+export function EngineersList() {
     const queryClient = useQueryClient();
-    const [openedTenantId, setOpenedTenantId] = useState<string | null>(null);
+    const [openedEngineerId, setOpenedEngineerId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [fieldErrors, setFieldErrors] = useState<Partial<Record<
-        "lastName" | "firstName" | "middleName" | "phone" | "email",
-        string
-    >>>({});
+    const [fieldErrors, setFieldErrors] = useState<EngineerErrors>({});
     const [formError, setFormError] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
@@ -67,9 +61,9 @@ export function TenantsList() {
         queryFn: () => UsersApi.listUsers(),
     });
 
-    const { data: rentals } = useQuery({
-        queryKey: ["rentals"],
-        queryFn: () => RentalsApi.listRentals(),
+    const { data: applications } = useQuery({
+        queryKey: ["applications"],
+        queryFn: () => ApplicationsApi.listApplications(),
     });
 
     const { data: warehouses } = useQuery({
@@ -77,7 +71,7 @@ export function TenantsList() {
         queryFn: () => WarehousesApi.listWarehouses(),
     });
 
-    const createTenantMutation = useMutation({
+    const createEngineerMutation = useMutation({
         mutationFn: (input: {
             lastName: string;
             firstName: string;
@@ -89,7 +83,7 @@ export function TenantsList() {
             UsersApi.createUser({
                 email: input.email,
                 password: input.password,
-                role: "CLIENT",
+                role: "ENGINEER",
                 firstName: input.firstName,
                 lastName: input.lastName,
                 middleName: input.middleName,
@@ -98,8 +92,8 @@ export function TenantsList() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             notifications.show({
-                title: "Арендатор добавлен",
-                message: "Карточка арендатора создана.",
+                title: "Инженер добавлен",
+                message: "Карточка инженера создана.",
                 color: "green",
             });
             setIsCreateOpen(false);
@@ -124,12 +118,12 @@ export function TenantsList() {
                 return;
             }
 
-            setFormError("Не удалось создать арендатора.");
+            setFormError("Не удалось создать инженера.");
         },
     });
 
-    const tenants = useMemo(
-        () => (users ?? []).filter((user) => user.role === "CLIENT"),
+    const engineers = useMemo(
+        () => (users ?? []).filter((user) => user.role === "ENGINEER"),
         [users],
     );
 
@@ -139,35 +133,44 @@ export function TenantsList() {
         return map;
     }, [warehouses]);
 
-    const rentalsByUser = useMemo(() => {
-        const map = new Map<string, typeof rentals>();
-        (rentals ?? []).forEach((rental) => {
-            const current = map.get(rental.userId) ?? [];
-            map.set(rental.userId, [...current, rental]);
+    const applicationsByEngineer = useMemo(() => {
+        const map = new Map<string, typeof applications>();
+        (applications ?? []).forEach((application) => {
+            application.engineers.forEach((engineer) => {
+                const current = map.get(engineer.engineerId) ?? [];
+                map.set(engineer.engineerId, [...current, application]);
+            });
         });
         return map;
-    }, [rentals]);
+    }, [applications]);
 
-    const tenantsWithMetrics = useMemo(() => {
+    const engineersWithMetrics = useMemo(() => {
         const now = new Date();
-        return tenants
-            .map((tenant) => {
-                const tenantRentals = rentalsByUser.get(tenant.id) ?? [];
-                const totalPrice = tenantRentals.reduce((sum, rental) => sum + rental.totalPrice, 0);
-                const totalArea = tenantRentals.reduce((sum, rental) => sum + rental.areaSquare, 0);
-                const status = getStatusLabel(now, tenantRentals);
-                return { tenant, tenantRentals, totalPrice, totalArea, status };
+        return engineers
+            .map((engineer) => {
+                const engineerApplications = applicationsByEngineer.get(engineer.id) ?? [];
+                const status = getStatusLabel(now, engineerApplications.map((app) => ({
+                    status: app.status,
+                    openStatus: app.openStatus,
+                    createdAt: app.createdAt,
+                })));
+                return {
+                    engineer,
+                    engineerApplications,
+                    totalCount: engineerApplications.length,
+                    status,
+                };
             })
             .sort((a, b) =>
-                sortOrder === "desc" ? b.totalArea - a.totalArea : a.totalArea - b.totalArea,
+                sortOrder === "desc" ? b.totalCount - a.totalCount : a.totalCount - b.totalCount,
             );
-    }, [rentalsByUser, sortOrder, tenants]);
+    }, [applicationsByEngineer, engineers, sortOrder]);
 
-    const handleTenantToggle = (tenantId: string) => {
-        setOpenedTenantId((prev) => (prev === tenantId ? null : tenantId));
+    const handleEngineerToggle = (engineerId: string) => {
+        setOpenedEngineerId((prev) => (prev === engineerId ? null : engineerId));
     };
 
-    const handleCreateTenant = (values: {
+    const handleCreateEngineer = (values: {
         lastName: string;
         firstName: string;
         middleName: string;
@@ -177,7 +180,7 @@ export function TenantsList() {
     }) => {
         setFieldErrors({});
         setFormError(null);
-        createTenantMutation.mutate(values);
+        createEngineerMutation.mutate(values);
     };
 
     return (
@@ -185,10 +188,10 @@ export function TenantsList() {
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <Text fw={700} size="xl">
-                        Список арендаторов
+                        Список инженеров
                     </Text>
                     <Text size="sm" c="dimmed">
-                        Действующие договоры аренды
+                        Текущие заявки инженеров
                     </Text>
                 </div>
                 <Select
@@ -196,40 +199,34 @@ export function TenantsList() {
                     value={sortOrder}
                     onChange={(value) => setSortOrder((value as SortOrder) ?? "desc")}
                     data={[
-                        { value: "desc", label: "Сортировать по площади (убыв.)" },
-                        { value: "asc", label: "Сортировать по площади (возр.)" },
+                        { value: "desc", label: "Сортировать по количеству (убыв.)" },
+                        { value: "asc", label: "Сортировать по количеству (возр.)" },
                     ]}
                     w={260}
                 />
             </div>
 
             <div className="space-y-4">
-                {tenantsWithMetrics.map(({ tenant, tenantRentals, totalPrice, totalArea, status }) => (
-                    <div key={tenant.id} className="rounded-lg border border-gray-200 bg-white shadow-sm">
+                {engineersWithMetrics.map(({ engineer, engineerApplications, totalCount, status }) => (
+                    <div key={engineer.id} className="rounded-lg border border-gray-200 bg-white shadow-sm">
                         <button
                             type="button"
                             className="flex w-full flex-wrap items-center justify-between gap-4 px-5 py-4 text-left"
-                            onClick={() => handleTenantToggle(tenant.id)}
+                            onClick={() => handleEngineerToggle(engineer.id)}
                         >
                             <div>
-                                <Text fw={700}>{getTenantName(tenant)}</Text>
+                                <Text fw={700}>{getEngineerName(engineer)}</Text>
                                 <Text size="xs" c="dimmed">
-                                    ID: {tenant.id}
+                                    ID: {engineer.id}
                                 </Text>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-6">
                                 <div className="text-right">
                                     <Text size="xs" c="dimmed">
-                                        ОБЩАЯ СТАВКА
+                                        ЗАЯВОК
                                     </Text>
-                                    <Text fw={700}>{formatCurrency(totalPrice)} руб/мес</Text>
-                                </div>
-                                <div className="text-right">
-                                    <Text size="xs" c="dimmed">
-                                        ОБЩАЯ ПЛОЩАДЬ
-                                    </Text>
-                                    <Text fw={700}>{formatArea(totalArea)} кв.м</Text>
+                                    <Text fw={700}>{formatCount(totalCount)}</Text>
                                 </div>
                                 <div
                                     className="rounded px-3 py-1 text-xs font-semibold"
@@ -237,7 +234,7 @@ export function TenantsList() {
                                 >
                                     {status.label}
                                 </div>
-                                {openedTenantId === tenant.id ? (
+                                {openedEngineerId === engineer.id ? (
                                     <ChevronUpIcon size={18} className="text-gray-500" />
                                 ) : (
                                     <ChevronDownIcon size={18} className="text-gray-500" />
@@ -245,64 +242,56 @@ export function TenantsList() {
                             </div>
                         </button>
 
-                        {openedTenantId === tenant.id && (
+                        {openedEngineerId === engineer.id && (
                             <div className="border-t border-gray-200 px-5 pb-4">
-                                <div className="grid grid-cols-1 gap-3 py-4 text-xs font-semibold text-gray-400 sm:grid-cols-5">
+                                <div className="grid grid-cols-1 gap-3 py-4 text-xs font-semibold text-gray-400 sm:grid-cols-4">
                                     <div>СКЛАД</div>
-                                    <div>СЕКЦИЯ</div>
-                                    <div>ПЛОЩАДЬ</div>
-                                    <div>СУММА</div>
-                                    <div className="text-right">СРОК ДО</div>
+                                    <div>СТАТУС</div>
+                                    <div>ЗАЯВКА</div>
+                                    <div className="text-right">СОЗДАНА</div>
                                 </div>
                                 <div className="space-y-3">
-                                    {tenantRentals.length === 0 ? (
+                                    {engineerApplications.length === 0 ? (
                                         <Text size="sm" c="dimmed">
-                                            У арендатора пока нет аренд.
+                                            У инженера пока нет заявок.
                                         </Text>
                                     ) : (
-                                        tenantRentals.map((rental) => (
+                                        engineerApplications.map((application) => (
                                             <div
-                                                key={rental.id}
-                                                className="grid grid-cols-1 items-center gap-3 rounded-md border border-gray-200 px-4 py-3 text-sm sm:grid-cols-5"
+                                                key={application.id}
+                                                className="grid grid-cols-1 items-center gap-3 rounded-md border border-gray-200 px-4 py-3 text-sm sm:grid-cols-4"
                                             >
                                                 <div className="font-semibold">
-                                                    {warehousesById.get(rental.warehouseId) ?? `Склад #${rental.warehouseId}`}
+                                                    {warehousesById.get(application.warehouseId) ?? `Склад #${application.warehouseId}`}
                                                 </div>
-                                                <div>{`${String.fromCharCode(64 + rental.rowStart)}${rental.colStart}-${String.fromCharCode(64 + rental.rowEnd)}${rental.colEnd}`}</div>
-                                                <div>{formatArea(rental.areaSquare)} кв.м</div>
-                                                <div>{formatCurrency(rental.totalPrice)} руб</div>
+                                                <div>{application.status}</div>
+                                                <div className="truncate" title={application.description}>
+                                                    {application.description}
+                                                </div>
                                                 <div className="text-right">
-                                                    {new Date(rental.endDate).toLocaleDateString("ru-RU")}
+                                                    {new Date(application.createdAt).toLocaleDateString("ru-RU")}
                                                 </div>
                                             </div>
                                         ))
                                     )}
                                 </div>
-
-                                {tenantRentals.length > 0 && (
-                                    <div className="mt-4 flex items-center justify-end gap-6 border-t border-gray-100 pt-3 text-sm font-semibold">
-                                        <span>ИТОГО</span>
-                                        <span>{formatArea(totalArea)} кв.м</span>
-                                        <span>{formatCurrency(totalPrice)} руб/мес</span>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
                 ))}
             </div>
 
-            <Button onClick={() => setIsCreateOpen(true)}>Добавить арендатора</Button>
+            <Button onClick={() => setIsCreateOpen(true)}>Добавить инженера</Button>
 
-            <CreateTenantModal
+            <CreateEngineerModal
                 opened={isCreateOpen}
                 onClose={() => {
                     setIsCreateOpen(false);
                     setFieldErrors({});
                     setFormError(null);
                 }}
-                onSubmit={handleCreateTenant}
-                isSubmitting={createTenantMutation.isPending}
+                onSubmit={handleCreateEngineer}
+                isSubmitting={createEngineerMutation.isPending}
                 fieldErrors={fieldErrors}
                 formError={formError}
                 onFieldChange={(field) => {

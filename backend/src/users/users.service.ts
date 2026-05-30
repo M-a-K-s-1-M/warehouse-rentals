@@ -20,14 +20,16 @@ export class UsersService {
 
     async createUser(input: {
         email: string;
-        password?: string;
+        password: string;
         role: RoleType;
         firstName?: string;
         lastName?: string;
         middleName?: string;
         phone?: string;
     }) {
-        const existing = await this.prisma.user.findUnique({ where: { email: input.email } });
+        const existing = await this.prisma.user.findFirst({
+            where: { email: input.email },
+        });
         if (existing) {
             throw new BadRequestException("Email already exists");
         }
@@ -44,7 +46,6 @@ export class UsersService {
         if (input.firstName && input.lastName) {
             const existingUser = await this.prisma.user.findFirst({
                 where: {
-                    role: input.role,
                     firstName: input.firstName,
                     lastName: input.lastName,
                     middleName: input.middleName ?? null,
@@ -55,8 +56,7 @@ export class UsersService {
             }
         }
 
-        const rawPassword = input.password ?? Math.random().toString(36).slice(2, 12);
-        const passwordHash = await bcrypt.hash(rawPassword, 10);
+        const passwordHash = await bcrypt.hash(input.password, 10);
 
         return this.prisma.user.create({
             data: {

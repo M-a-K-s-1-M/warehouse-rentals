@@ -6,7 +6,7 @@ export declare class UsersService {
     private readonly safeSelect;
     createUser(input: {
         email: string;
-        password?: string;
+        password: string;
         role: RoleType;
         firstName?: string;
         lastName?: string;

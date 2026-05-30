@@ -9,6 +9,7 @@ export class UsersApi {
 
     static async createUser(input: {
         email: string;
+        password: string;
         role: "MANAGER" | "ENGINEER" | "CLIENT";
         firstName?: string;
         lastName?: string;

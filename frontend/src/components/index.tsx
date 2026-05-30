@@ -6,3 +6,5 @@ export { WarehouseGrid } from './warehouse-grid/index';
 export { RentalCreateModal } from './warehouse-grid/rental-create-modal';
 export { TenantsList } from './tenants-list/index';
 export { CreateTenantModal } from './tenants-list/create-tenant-modal';
+export { EngineersList } from './engineers-list/index';
+export { CreateEngineerModal } from './engineers-list/create-engineer-modal';
