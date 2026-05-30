@@ -7,7 +7,7 @@ import {
 import theme from "./theme";
 import "./globals.css";
 import { Notifications } from "@mantine/notifications";
-import { QueryProvider } from "@/components";
+import { AppProviders } from "@/components";
 
 export const metadata: Metadata = {
   title: "Next App Mantine Tailwind Template",
@@ -27,9 +27,7 @@ export default function RootLayout({
       <body className="antialiased">
         <MantineProvider theme={theme}>
           <Notifications />
-          <QueryProvider>
-            {children}
-          </QueryProvider>
+          <AppProviders>{children}</AppProviders>
         </MantineProvider>
       </body>
     </html>
