@@ -2,7 +2,7 @@
 
 import { CreateTenantModal } from "@/components";
 import { RentalsApi, UsersApi, WarehousesApi } from "@/lib";
-import { Button, Group, Modal, Select, Text } from "@mantine/core";
+import { Button, Select, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
@@ -55,14 +55,11 @@ export function TenantsList() {
     const queryClient = useQueryClient();
     const [openedTenantId, setOpenedTenantId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [pendingTenant, setPendingTenant] = useState<{
-        lastName: string;
-        firstName: string;
-        middleName: string;
-        phone: string;
-        email: string;
-    } | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<Partial<Record<
+        "lastName" | "firstName" | "middleName" | "phone" | "email",
+        string
+    >>>({});
+    const [formError, setFormError] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
     const { data: users } = useQuery({
@@ -103,16 +100,29 @@ export function TenantsList() {
                 message: "Карточка арендатора создана.",
                 color: "green",
             });
-            setConfirmOpen(false);
             setIsCreateOpen(false);
-            setPendingTenant(null);
+            setFieldErrors({});
+            setFormError(null);
         },
-        onError: () => {
-            notifications.show({
-                title: "Ошибка",
-                message: "Не удалось создать арендатора.",
-                color: "red",
-            });
+        onError: (error) => {
+            const payload = (error as { response?: { data?: { message?: string | string[] } } })
+                .response?.data?.message;
+            const message = Array.isArray(payload) ? payload[0] : payload;
+
+            if (message === "Email already exists") {
+                setFieldErrors({ email: "Почта уже занята" });
+                return;
+            }
+            if (message === "Phone already exists") {
+                setFieldErrors({ phone: "Телефон уже занят" });
+                return;
+            }
+            if (message === "User already exists") {
+                setFieldErrors({ lastName: "Пользователь уже существует" });
+                return;
+            }
+
+            setFormError("Не удалось создать арендатора.");
         },
     });
 
@@ -162,15 +172,9 @@ export function TenantsList() {
         phone: string;
         email: string;
     }) => {
-        setPendingTenant(values);
-        setConfirmOpen(true);
-    };
-
-    const handleConfirmCreate = () => {
-        if (!pendingTenant) {
-            return;
-        }
-        createTenantMutation.mutate(pendingTenant);
+        setFieldErrors({});
+        setFormError(null);
+        createTenantMutation.mutate(values);
     };
 
     return (
@@ -287,24 +291,25 @@ export function TenantsList() {
 
             <CreateTenantModal
                 opened={isCreateOpen}
-                onClose={() => setIsCreateOpen(false)}
+                onClose={() => {
+                    setIsCreateOpen(false);
+                    setFieldErrors({});
+                    setFormError(null);
+                }}
                 onSubmit={handleCreateTenant}
                 isSubmitting={createTenantMutation.isPending}
+                fieldErrors={fieldErrors}
+                formError={formError}
+                onFieldChange={(field) => {
+                    setFieldErrors((prev) => {
+                        if (!prev[field]) {
+                            return prev;
+                        }
+                        return { ...prev, [field]: "" };
+                    });
+                    setFormError(null);
+                }}
             />
-
-            <Modal opened={confirmOpen} onClose={() => setConfirmOpen(false)} title="Подтвердить" centered>
-                <Text size="sm" c="dimmed" mb="md">
-                    Создать арендатора?
-                </Text>
-                <Group justify="flex-end">
-                    <Button variant="default" onClick={() => setConfirmOpen(false)}>
-                        Отмена
-                    </Button>
-                    <Button onClick={handleConfirmCreate} loading={createTenantMutation.isPending}>
-                        Подтвердить
-                    </Button>
-                </Group>
-            </Modal>
         </div>
     );
 }

@@ -32,6 +32,29 @@ export class UsersService {
             throw new BadRequestException("Email already exists");
         }
 
+        if (input.phone) {
+            const existingPhone = await this.prisma.user.findFirst({
+                where: { phone: input.phone },
+            });
+            if (existingPhone) {
+                throw new BadRequestException("Phone already exists");
+            }
+        }
+
+        if (input.firstName && input.lastName) {
+            const existingUser = await this.prisma.user.findFirst({
+                where: {
+                    role: input.role,
+                    firstName: input.firstName,
+                    lastName: input.lastName,
+                    middleName: input.middleName ?? null,
+                },
+            });
+            if (existingUser) {
+                throw new BadRequestException("User already exists");
+            }
+        }
+
         const rawPassword = input.password ?? Math.random().toString(36).slice(2, 12);
         const passwordHash = await bcrypt.hash(rawPassword, 10);
 

@@ -16,9 +16,20 @@ type CreateTenantModalProps = {
     onClose: () => void;
     onSubmit: (values: CreateTenantValues) => void;
     isSubmitting: boolean;
+    fieldErrors?: Partial<Record<keyof CreateTenantValues, string>>;
+    formError?: string | null;
+    onFieldChange?: (field: keyof CreateTenantValues) => void;
 };
 
-export function CreateTenantModal({ opened, onClose, onSubmit, isSubmitting }: CreateTenantModalProps) {
+export function CreateTenantModal({
+    opened,
+    onClose,
+    onSubmit,
+    isSubmitting,
+    fieldErrors,
+    formError,
+    onFieldChange,
+}: CreateTenantModalProps) {
     const [values, setValues] = useState<CreateTenantValues>({
         lastName: "",
         firstName: "",
@@ -37,27 +48,29 @@ export function CreateTenantModal({ opened, onClose, onSubmit, isSubmitting }: C
         (value: string | React.ChangeEvent<HTMLInputElement> | null) => {
             const nextValue = typeof value === "string" ? value : value?.currentTarget?.value ?? "";
             setValues((prev) => ({ ...prev, [field]: nextValue }));
+            onFieldChange?.(field);
         };
 
     const nameRegex = /^[А-Яа-яЁё\-\s]+$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneDigits = values.phone.replace(/\D/g, "");
+    const phoneStrict = /^8\d{10}$/;
 
-    const lastNameError = values.lastName.trim() && !nameRegex.test(values.lastName)
+    const lastNameError = (values.lastName.trim() && !nameRegex.test(values.lastName)
         ? "Только русские буквы"
-        : null;
-    const firstNameError = values.firstName.trim() && !nameRegex.test(values.firstName)
+        : null) ?? fieldErrors?.lastName ?? null;
+    const firstNameError = (values.firstName.trim() && !nameRegex.test(values.firstName)
         ? "Только русские буквы"
-        : null;
-    const middleNameError = values.middleName.trim() && !nameRegex.test(values.middleName)
+        : null) ?? fieldErrors?.firstName ?? null;
+    const middleNameError = (values.middleName.trim() && !nameRegex.test(values.middleName)
         ? "Только русские буквы"
+        : null) ?? fieldErrors?.middleName ?? null;
+    const phoneError = values.phone.trim() && !phoneStrict.test(values.phone)
+        ? "Телефон должен начинаться с 8 и содержать 11 цифр"
         : null;
-    const phoneError = values.phone.trim() && phoneDigits.length !== 11
-        ? "Введите 11 цифр"
-        : null;
-    const emailError = values.email.trim() && !emailRegex.test(values.email)
+    const emailError = (values.email.trim() && !emailRegex.test(values.email)
         ? "Некорректная почта"
-        : null;
+        : null) ?? fieldErrors?.email ?? null;
 
     const isValid = values.lastName.trim()
         && values.firstName.trim()
@@ -94,6 +107,7 @@ export function CreateTenantModal({ opened, onClose, onSubmit, isSubmitting }: C
                 />
                 <TextInput
                     label="Телефон"
+                    type="tel"
                     placeholder="+7 (999) 123-45-67"
                     value={values.phone}
                     onChange={handleChange("phone")}
@@ -108,6 +122,10 @@ export function CreateTenantModal({ opened, onClose, onSubmit, isSubmitting }: C
                     error={emailError}
                     required
                 />
+
+                {formError && (
+                    <div className="text-sm text-red-600">{formError}</div>
+                )}
 
                 <Group justify="flex-end">
                     <Button variant="default" onClick={onClose} disabled={isSubmitting}>
