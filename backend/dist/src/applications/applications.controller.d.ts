@@ -14,59 +14,66 @@ export declare class ApplicationsController {
         };
     }): Promise<{
         photos: {
+            url: string;
             id: string;
             createdAt: Date;
-            kind: import("@prisma/client").$Enums.PhotoKind;
-            url: string;
-            uploadedById: string | null;
             applicationId: string;
+            uploadedById: string | null;
+            kind: import("@prisma/client").$Enums.PhotoKind;
         }[];
     } & {
-        warehouseId: number;
-        description: string;
-        userId: string;
         id: string;
+        createdAt: Date;
+        description: string;
+        warehouseId: number;
+        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        createdAt: Date;
     }>;
     listApplications(status?: ApplicationStatus, openStatus?: ApplicationOpenStatus, userId?: string, warehouseId?: number): Promise<({
         photos: {
+            url: string;
             id: string;
             createdAt: Date;
-            kind: import("@prisma/client").$Enums.PhotoKind;
-            url: string;
-            uploadedById: string | null;
             applicationId: string;
+            uploadedById: string | null;
+            kind: import("@prisma/client").$Enums.PhotoKind;
         }[];
         engineers: ({
             engineer: {
                 id: string;
-                createdAt: Date;
                 email: string;
+                createdAt: Date;
                 role: import("@prisma/client").$Enums.RoleType;
             };
         } & {
+            applicationId: string;
             assignedAt: Date;
             engineerId: string;
-            applicationId: string;
         })[];
     } & {
-        warehouseId: number;
-        description: string;
-        userId: string;
         id: string;
+        createdAt: Date;
+        description: string;
+        warehouseId: number;
+        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        createdAt: Date;
     })[]>;
     getApplication(id: string): Promise<{
+        user: {
+            id: string;
+            email: string;
+            passwordHash: string;
+            createdAt: Date;
+            role: import("@prisma/client").$Enums.RoleType;
+        };
         warehouse: {
-            description: string | null;
             id: number;
             createdAt: Date;
             title: string;
             address: string;
+            description: string | null;
             square: number;
             cellSquare: number;
             gridRows: number;
@@ -74,80 +81,73 @@ export declare class ApplicationsController {
             pricePerCell: number;
             updatedAt: Date;
         };
-        user: {
-            id: string;
-            createdAt: Date;
-            email: string;
-            passwordHash: string;
-            role: import("@prisma/client").$Enums.RoleType;
-        };
         photos: {
+            url: string;
             id: string;
             createdAt: Date;
-            kind: import("@prisma/client").$Enums.PhotoKind;
-            url: string;
-            uploadedById: string | null;
             applicationId: string;
+            uploadedById: string | null;
+            kind: import("@prisma/client").$Enums.PhotoKind;
         }[];
         engineers: ({
             engineer: {
                 id: string;
-                createdAt: Date;
                 email: string;
+                createdAt: Date;
                 role: import("@prisma/client").$Enums.RoleType;
             };
         } & {
+            applicationId: string;
             assignedAt: Date;
             engineerId: string;
-            applicationId: string;
         })[];
     } & {
-        warehouseId: number;
-        description: string;
-        userId: string;
         id: string;
+        createdAt: Date;
+        description: string;
+        warehouseId: number;
+        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        createdAt: Date;
     }>;
     updateStatus(id: string, body: UpdateApplicationStatusDto): Promise<{
-        warehouseId: number;
-        description: string;
-        userId: string;
         id: string;
+        createdAt: Date;
+        description: string;
+        warehouseId: number;
+        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        createdAt: Date;
     }>;
     updateOpenStatus(id: string, body: UpdateApplicationOpenStatusDto): Promise<{
-        warehouseId: number;
-        description: string;
-        userId: string;
         id: string;
+        createdAt: Date;
+        description: string;
+        warehouseId: number;
+        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        createdAt: Date;
     }>;
     assignEngineers(id: string, body: AssignEngineersDto): Promise<{
         engineers: ({
             engineer: {
                 id: string;
-                createdAt: Date;
                 email: string;
+                createdAt: Date;
                 role: import("@prisma/client").$Enums.RoleType;
             };
         } & {
+            applicationId: string;
             assignedAt: Date;
             engineerId: string;
-            applicationId: string;
         })[];
     } & {
-        warehouseId: number;
-        description: string;
-        userId: string;
         id: string;
+        createdAt: Date;
+        description: string;
+        warehouseId: number;
+        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        createdAt: Date;
     }>;
 }

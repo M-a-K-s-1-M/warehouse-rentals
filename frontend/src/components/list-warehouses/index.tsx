@@ -25,6 +25,10 @@ export function ListWarehouses() {
     const sortedWarehouses = warehouses ?? [];
 
     const handleSquareOrderChange = (value: string | null) => {
+        if (value === squareOrder) {
+            return;
+        }
+
         const nextParams = new URLSearchParams(searchParams.toString());
 
         if (value) {
