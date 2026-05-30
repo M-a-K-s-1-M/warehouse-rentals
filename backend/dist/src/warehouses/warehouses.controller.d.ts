@@ -1,5 +1,6 @@
 import { CreateWarehouseDto } from "./dto/create-warehouse.dto";
 import { UpdateWarehouseDto } from "./dto/update-warehouse.dto";
+import { UpdateWarehouseBlocksDto } from "./dto/update-warehouse-blocks.dto";
 import { WarehousesService } from "./warehouses.service";
 export declare class WarehousesController {
     private readonly warehousesService;
@@ -43,6 +44,24 @@ export declare class WarehousesController {
         pricePerCell: number;
         updatedAt: Date;
     }>;
+    listBlocks(id: number): Promise<{
+        id: number;
+        createdAt: Date;
+        warehouseId: number;
+        label: string;
+    }[]>;
+    blockCells(id: number, body: UpdateWarehouseBlocksDto): Promise<{
+        id: number;
+        createdAt: Date;
+        warehouseId: number;
+        label: string;
+    }[]>;
+    unblockCells(id: number, body: UpdateWarehouseBlocksDto): Promise<{
+        id: number;
+        createdAt: Date;
+        warehouseId: number;
+        label: string;
+    }[]>;
     updateWarehouse(id: number, body: UpdateWarehouseDto): Promise<{
         id: number;
         createdAt: Date;

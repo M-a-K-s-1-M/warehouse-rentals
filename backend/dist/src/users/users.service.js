@@ -25,6 +25,10 @@ let UsersService = class UsersService {
         id: true,
         email: true,
         role: true,
+        firstName: true,
+        lastName: true,
+        middleName: true,
+        phone: true,
         createdAt: true,
     };
     async createUser(input) {
@@ -32,12 +36,17 @@ let UsersService = class UsersService {
         if (existing) {
             throw new common_1.BadRequestException("Email already exists");
         }
-        const passwordHash = await bcryptjs_1.default.hash(input.password, 10);
+        const rawPassword = input.password ?? Math.random().toString(36).slice(2, 12);
+        const passwordHash = await bcryptjs_1.default.hash(rawPassword, 10);
         return this.prisma.user.create({
             data: {
                 email: input.email,
                 passwordHash,
                 role: input.role,
+                firstName: input.firstName ?? null,
+                lastName: input.lastName ?? null,
+                middleName: input.middleName ?? null,
+                phone: input.phone ?? null,
             },
             select: this.safeSelect,
         });
@@ -72,6 +81,18 @@ let UsersService = class UsersService {
         }
         if (input.role) {
             data.role = input.role;
+        }
+        if (input.firstName !== undefined) {
+            data.firstName = input.firstName ?? null;
+        }
+        if (input.lastName !== undefined) {
+            data.lastName = input.lastName ?? null;
+        }
+        if (input.middleName !== undefined) {
+            data.middleName = input.middleName ?? null;
+        }
+        if (input.phone !== undefined) {
+            data.phone = input.phone ?? null;
         }
         return this.prisma.user.update({
             where: { id },

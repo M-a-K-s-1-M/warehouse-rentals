@@ -22,12 +22,12 @@ export default function MainPageLayout({ children }: { children: React.ReactNode
         <AppShell
             layout="alt"
             header={{ height: 64 }}
-            navbar={{ width: 250, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+            navbar={{ width: 250, breakpoint: 'sm', collapsed: { mobile: !opened, desktop: !opened } }}
 
         >
             <AppShellHeader >
                 <Group className="h-full px-md">
-                    <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+                    <Burger opened={opened} onClick={toggle} size="sm" />
 
                     <h1 className="text-2xl font-semibold">WarehouseRentals</h1>
                 </Group>

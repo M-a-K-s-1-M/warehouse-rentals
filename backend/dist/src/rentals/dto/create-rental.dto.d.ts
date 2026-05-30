@@ -10,4 +10,5 @@ export declare class CreateRentalDto {
     colEnd: number;
     extraContactName?: string;
     extraContactEmail?: string;
+    color?: string;
 }

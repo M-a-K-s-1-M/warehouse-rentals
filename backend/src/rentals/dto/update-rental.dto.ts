@@ -62,6 +62,10 @@ export class UpdateRentalDto {
     extraContactEmail?: string;
 
     @IsOptional()
+    @IsString()
+    color?: string;
+
+    @IsOptional()
     @IsEnum(RentalStatusType)
     rentalStatus?: RentalStatusType;
 }

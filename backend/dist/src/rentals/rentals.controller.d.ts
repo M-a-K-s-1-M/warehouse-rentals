@@ -20,6 +20,7 @@ export declare class RentalsController {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -40,6 +41,7 @@ export declare class RentalsController {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -60,6 +62,7 @@ export declare class RentalsController {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -80,6 +83,7 @@ export declare class RentalsController {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -100,6 +104,7 @@ export declare class RentalsController {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;

@@ -81,5 +81,26 @@ export declare class WarehousesService {
         pricePerCell: number;
         updatedAt: Date;
     }>;
+    listBlocks(warehouseId: number): Promise<{
+        id: number;
+        createdAt: Date;
+        warehouseId: number;
+        label: string;
+    }[]>;
+    blockCells(warehouseId: number, labels: string[]): Promise<{
+        id: number;
+        createdAt: Date;
+        warehouseId: number;
+        label: string;
+    }[]>;
+    unblockCells(warehouseId: number, labels: string[]): Promise<{
+        id: number;
+        createdAt: Date;
+        warehouseId: number;
+        label: string;
+    }[]>;
     private calculateGrid;
+    private parseLabel;
+    private normalizeLabels;
+    private assertGridBounds;
 }

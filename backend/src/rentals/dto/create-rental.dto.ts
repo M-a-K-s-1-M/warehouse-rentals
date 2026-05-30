@@ -50,4 +50,8 @@ export class CreateRentalDto {
     @IsOptional()
     @IsEmail()
     extraContactEmail?: string;
+
+    @IsOptional()
+    @IsString()
+    color?: string;
 }

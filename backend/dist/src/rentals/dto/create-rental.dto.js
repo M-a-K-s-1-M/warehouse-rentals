@@ -23,6 +23,7 @@ class CreateRentalDto {
     colEnd;
     extraContactName;
     extraContactEmail;
+    color;
 }
 exports.CreateRentalDto = CreateRentalDto;
 __decorate([
@@ -77,4 +78,9 @@ __decorate([
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], CreateRentalDto.prototype, "extraContactEmail", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateRentalDto.prototype, "color", void 0);
 //# sourceMappingURL=create-rental.dto.js.map

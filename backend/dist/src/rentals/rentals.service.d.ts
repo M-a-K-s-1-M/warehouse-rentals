@@ -15,6 +15,7 @@ export declare class RentalsService {
         colEnd: number;
         extraContactName?: string;
         extraContactEmail?: string;
+        color?: string;
     }): Promise<{
         id: string;
         createdAt: Date;
@@ -31,6 +32,7 @@ export declare class RentalsService {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -54,6 +56,7 @@ export declare class RentalsService {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -74,6 +77,7 @@ export declare class RentalsService {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -91,6 +95,7 @@ export declare class RentalsService {
         extraContactName?: string;
         extraContactEmail?: string;
         rentalStatus?: RentalStatusType;
+        color?: string;
     }): Promise<{
         id: string;
         createdAt: Date;
@@ -107,6 +112,7 @@ export declare class RentalsService {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;
@@ -127,6 +133,7 @@ export declare class RentalsService {
         totalCells: number;
         areaSquare: number;
         totalPrice: number;
+        color: string | null;
         extraContactName: string | null;
         extraContactEmail: string | null;
         rentalStatus: import("@prisma/client").$Enums.RentalStatusType;

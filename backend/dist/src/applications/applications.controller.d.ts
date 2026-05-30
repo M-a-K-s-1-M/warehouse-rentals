@@ -65,6 +65,10 @@ export declare class ApplicationsController {
             id: string;
             email: string;
             passwordHash: string;
+            firstName: string | null;
+            lastName: string | null;
+            middleName: string | null;
+            phone: string | null;
             createdAt: Date;
             role: import("@prisma/client").$Enums.RoleType;
         };

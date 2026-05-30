@@ -16,6 +16,7 @@ exports.WarehousesController = void 0;
 const common_1 = require("@nestjs/common");
 const create_warehouse_dto_1 = require("./dto/create-warehouse.dto");
 const update_warehouse_dto_1 = require("./dto/update-warehouse.dto");
+const update_warehouse_blocks_dto_1 = require("./dto/update-warehouse-blocks.dto");
 const warehouses_service_1 = require("./warehouses.service");
 let WarehousesController = class WarehousesController {
     warehousesService;
@@ -30,6 +31,15 @@ let WarehousesController = class WarehousesController {
     }
     async getWarehouse(id) {
         return this.warehousesService.getWarehouse(id);
+    }
+    async listBlocks(id) {
+        return this.warehousesService.listBlocks(id);
+    }
+    async blockCells(id, body) {
+        return this.warehousesService.blockCells(id, body.labels);
+    }
+    async unblockCells(id, body) {
+        return this.warehousesService.unblockCells(id, body.labels);
     }
     async updateWarehouse(id, body) {
         return this.warehousesService.updateWarehouse(id, body);
@@ -60,6 +70,29 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], WarehousesController.prototype, "getWarehouse", null);
+__decorate([
+    (0, common_1.Get)(":id/blocks"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], WarehousesController.prototype, "listBlocks", null);
+__decorate([
+    (0, common_1.Post)(":id/blocks"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, update_warehouse_blocks_dto_1.UpdateWarehouseBlocksDto]),
+    __metadata("design:returntype", Promise)
+], WarehousesController.prototype, "blockCells", null);
+__decorate([
+    (0, common_1.Delete)(":id/blocks"),
+    __param(0, (0, common_1.Param)("id", common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, update_warehouse_blocks_dto_1.UpdateWarehouseBlocksDto]),
+    __metadata("design:returntype", Promise)
+], WarehousesController.prototype, "unblockCells", null);
 __decorate([
     (0, common_1.Patch)(":id"),
     __param(0, (0, common_1.Param)("id", common_1.ParseIntPipe)),

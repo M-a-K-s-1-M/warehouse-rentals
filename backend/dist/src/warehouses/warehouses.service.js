@@ -71,6 +71,42 @@ let WarehousesService = class WarehousesService {
         await this.getWarehouse(id);
         return this.prisma.warehouse.delete({ where: { id } });
     }
+    async listBlocks(warehouseId) {
+        await this.getWarehouse(warehouseId);
+        return this.prisma.warehouseBlock.findMany({
+            where: { warehouseId },
+            orderBy: { createdAt: "desc" },
+        });
+    }
+    async blockCells(warehouseId, labels) {
+        const warehouse = await this.getWarehouse(warehouseId);
+        const normalized = this.normalizeLabels(labels);
+        for (const label of normalized) {
+            const coords = this.parseLabel(label);
+            this.assertGridBounds(warehouse.gridRows, warehouse.gridCols, {
+                rowStart: coords.row,
+                rowEnd: coords.row,
+                colStart: coords.col,
+                colEnd: coords.col,
+            });
+        }
+        await this.prisma.warehouseBlock.createMany({
+            data: normalized.map((label) => ({ warehouseId, label })),
+            skipDuplicates: true,
+        });
+        return this.listBlocks(warehouseId);
+    }
+    async unblockCells(warehouseId, labels) {
+        await this.getWarehouse(warehouseId);
+        const normalized = this.normalizeLabels(labels);
+        await this.prisma.warehouseBlock.deleteMany({
+            where: {
+                warehouseId,
+                label: { in: normalized },
+            },
+        });
+        return this.listBlocks(warehouseId);
+    }
     calculateGrid(square, cellSquare) {
         if (square <= 0 || cellSquare <= 0) {
             throw new common_1.BadRequestException("Square values must be positive");
@@ -85,6 +121,38 @@ let WarehousesService = class WarehousesService {
         }
         const cols = totalCells / rows;
         return { rows, cols };
+    }
+    parseLabel(label) {
+        const trimmed = label.trim().toUpperCase();
+        const match = /^([A-Z]+)(\d+)$/.exec(trimmed);
+        if (!match) {
+            throw new common_1.BadRequestException(`Invalid cell label: ${label}`);
+        }
+        const letters = match[1];
+        const digits = match[2];
+        let row = 0;
+        for (const char of letters) {
+            row = row * 26 + (char.charCodeAt(0) - 64);
+        }
+        const col = Number(digits);
+        if (!Number.isFinite(col) || col <= 0) {
+            throw new common_1.BadRequestException(`Invalid cell label: ${label}`);
+        }
+        return { row, col };
+    }
+    normalizeLabels(labels) {
+        return Array.from(new Set(labels.map((label) => label.trim().toUpperCase()).filter(Boolean)));
+    }
+    assertGridBounds(maxRows, maxCols, input) {
+        if (input.rowStart <= 0 || input.colStart <= 0) {
+            throw new common_1.BadRequestException("Координаты сетки должны быть положительными");
+        }
+        if (input.rowStart > input.rowEnd || input.colStart > input.colEnd) {
+            throw new common_1.BadRequestException("Начало области должно быть раньше конца");
+        }
+        if (input.rowEnd > maxRows || input.colEnd > maxCols) {
+            throw new common_1.BadRequestException("Область выходит за границы склада");
+        }
     }
 };
 exports.WarehousesService = WarehousesService;

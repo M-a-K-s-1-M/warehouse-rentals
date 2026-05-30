@@ -24,6 +24,7 @@ class UpdateRentalDto {
     colEnd;
     extraContactName;
     extraContactEmail;
+    color;
     rentalStatus;
 }
 exports.UpdateRentalDto = UpdateRentalDto;
@@ -87,6 +88,11 @@ __decorate([
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], UpdateRentalDto.prototype, "extraContactEmail", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateRentalDto.prototype, "color", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.RentalStatusType),

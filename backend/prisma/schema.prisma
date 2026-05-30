@@ -16,6 +16,10 @@ model User {
   id                   String                @id @default(uuid())
   email                String                @unique
   passwordHash         String                @map("password_hash")
+  firstName            String?               @map("first_name")
+  lastName             String?               @map("last_name")
+  middleName           String?               @map("middle_name")
+  phone                String?               @map("phone")
   createdAt            DateTime              @default(now()) @map("created_at")
   role                 RoleType              @default(CLIENT)
   rentals              Rental[]
@@ -56,6 +60,7 @@ model Warehouse {
 
   rentals      Rental[]
   applications Application[]
+  blocks       WarehouseBlock[]
 
   @@map("warehouses")
 }
@@ -78,10 +83,11 @@ model Rental {
   colStart Int @map("col_start")
   colEnd   Int @map("col_end")
 
-  totalCells   Int   @map("total_cells")
-  areaSquare   Int   @map("area_square")
-  pricePerCell Float @map("price_per_cell")
-  totalPrice   Float @map("total_price")
+  totalCells   Int     @map("total_cells")
+  areaSquare   Int     @map("area_square")
+  pricePerCell Float   @map("price_per_cell")
+  totalPrice   Float   @map("total_price")
+  color        String? @map("color")
 
   extraContactName  String? @map("extra_contact_name")
   extraContactEmail String? @map("extra_contact_email")
@@ -90,6 +96,19 @@ model Rental {
   rentalStatus RentalStatusType @map("rental_status")
 
   @@map("rentals")
+}
+
+model WarehouseBlock {
+  id Int @id @default(autoincrement())
+
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId Int       @map("warehouse_id")
+
+  label     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([warehouseId, label])
+  @@map("warehouse_blocks")
 }
 
 model Application {

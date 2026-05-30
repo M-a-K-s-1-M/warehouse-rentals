@@ -11,5 +11,6 @@ export declare class UpdateRentalDto {
     colEnd?: number;
     extraContactName?: string;
     extraContactEmail?: string;
+    color?: string;
     rentalStatus?: RentalStatusType;
 }

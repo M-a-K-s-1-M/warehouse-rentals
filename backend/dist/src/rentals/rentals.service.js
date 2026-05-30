@@ -22,7 +22,7 @@ let RentalsService = class RentalsService {
         this.assertDateOrder(input.startDate, input.endDate);
         const warehouse = await this.getWarehouse(input.warehouseId);
         this.assertGridBounds(warehouse.gridRows, warehouse.gridCols, input);
-        const totals = this.calculateTotals(warehouse.cellSquare, warehouse.pricePerCell, input);
+        const totals = this.calculateTotals(warehouse.cellSquare, warehouse.pricePerCell, input, input.startDate, input.endDate);
         await this.assertNoOverlap({
             warehouseId: warehouse.id,
             startDate: input.startDate,
@@ -50,6 +50,7 @@ let RentalsService = class RentalsService {
                 totalPrice: totals.totalPrice,
                 extraContactName: input.extraContactName ?? null,
                 extraContactEmail: input.extraContactEmail ?? null,
+                color: input.color ?? null,
                 rentalStatus,
             },
         });
@@ -88,12 +89,7 @@ let RentalsService = class RentalsService {
             colStart,
             colEnd,
         });
-        const totals = this.calculateTotals(warehouse.cellSquare, warehouse.pricePerCell, {
-            rowStart,
-            rowEnd,
-            colStart,
-            colEnd,
-        });
+        const totals = this.calculateTotals(warehouse.cellSquare, warehouse.pricePerCell, { rowStart, rowEnd, colStart, colEnd }, startDate, endDate);
         await this.assertNoOverlap({
             warehouseId: warehouse.id,
             startDate,
@@ -126,6 +122,7 @@ let RentalsService = class RentalsService {
                 extraContactEmail: input.extraContactEmail === undefined
                     ? existing.extraContactEmail
                     : input.extraContactEmail,
+                color: input.color === undefined ? existing.color : input.color,
                 rentalStatus: input.rentalStatus ?? this.getRentalStatus(startDate, endDate),
             },
         });
@@ -152,10 +149,12 @@ let RentalsService = class RentalsService {
             throw new common_1.BadRequestException("Область выходит за границы склада");
         }
     }
-    calculateTotals(cellSquare, pricePerCell, input) {
+    calculateTotals(cellSquare, pricePerCell, input, startDate, endDate) {
         const totalCells = (input.rowEnd - input.rowStart + 1) * (input.colEnd - input.colStart + 1);
         const areaSquare = totalCells * cellSquare;
-        const totalPrice = totalCells * pricePerCell;
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+        const totalPrice = totalCells * pricePerCell * days;
         return { totalCells, areaSquare, pricePerCell, totalPrice };
     }
     getRentalStatus(startDate, endDate) {

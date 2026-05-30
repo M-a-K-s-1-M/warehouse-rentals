@@ -6,23 +6,39 @@ export declare class UsersService {
     private readonly safeSelect;
     createUser(input: {
         email: string;
-        password: string;
+        password?: string;
         role: RoleType;
+        firstName?: string;
+        lastName?: string;
+        middleName?: string;
+        phone?: string;
     }): Promise<{
         id: string;
         email: string;
+        firstName: string | null;
+        lastName: string | null;
+        middleName: string | null;
+        phone: string | null;
         createdAt: Date;
         role: import("@prisma/client").$Enums.RoleType;
     }>;
     listUsers(): Promise<{
         id: string;
         email: string;
+        firstName: string | null;
+        lastName: string | null;
+        middleName: string | null;
+        phone: string | null;
         createdAt: Date;
         role: import("@prisma/client").$Enums.RoleType;
     }[]>;
     getUser(id: string): Promise<{
         id: string;
         email: string;
+        firstName: string | null;
+        lastName: string | null;
+        middleName: string | null;
+        phone: string | null;
         createdAt: Date;
         role: import("@prisma/client").$Enums.RoleType;
     }>;
@@ -30,15 +46,27 @@ export declare class UsersService {
         email?: string;
         password?: string;
         role?: RoleType;
+        firstName?: string;
+        lastName?: string;
+        middleName?: string;
+        phone?: string;
     }): Promise<{
         id: string;
         email: string;
+        firstName: string | null;
+        lastName: string | null;
+        middleName: string | null;
+        phone: string | null;
         createdAt: Date;
         role: import("@prisma/client").$Enums.RoleType;
     }>;
     deleteUser(id: string): Promise<{
         id: string;
         email: string;
+        firstName: string | null;
+        lastName: string | null;
+        middleName: string | null;
+        phone: string | null;
         createdAt: Date;
         role: import("@prisma/client").$Enums.RoleType;
     }>;
@@ -46,6 +74,10 @@ export declare class UsersService {
         id: string;
         email: string;
         passwordHash: string;
+        firstName: string | null;
+        lastName: string | null;
+        middleName: string | null;
+        phone: string | null;
         createdAt: Date;
         role: import("@prisma/client").$Enums.RoleType;
     } | null>;

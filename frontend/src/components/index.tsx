@@ -2,3 +2,7 @@ export { MainSidebar } from './main-sidebar/index';
 export { ListWarehouses } from './list-warehouses/index';
 export * from './providers/index';
 export * from './buttons/index';
+export { WarehouseGrid } from './warehouse-grid/index';
+export { RentalCreateModal } from './warehouse-grid/rental-create-modal';
+export { TenantsList } from './tenants-list/index';
+export { CreateTenantModal } from './tenants-list/create-tenant-modal';

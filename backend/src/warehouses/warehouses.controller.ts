@@ -16,6 +16,7 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { CreateWarehouseDto } from "./dto/create-warehouse.dto";
 import { UpdateWarehouseDto } from "./dto/update-warehouse.dto";
+import { UpdateWarehouseBlocksDto } from "./dto/update-warehouse-blocks.dto";
 import { WarehousesService } from "./warehouses.service";
 
 @Controller("warehouses")
@@ -37,6 +38,27 @@ export class WarehousesController {
     @Get(":id")
     async getWarehouse(@Param("id", ParseIntPipe) id: number) {
         return this.warehousesService.getWarehouse(id);
+    }
+
+    @Get(":id/blocks")
+    async listBlocks(@Param("id", ParseIntPipe) id: number) {
+        return this.warehousesService.listBlocks(id);
+    }
+
+    @Post(":id/blocks")
+    async blockCells(
+        @Param("id", ParseIntPipe) id: number,
+        @Body() body: UpdateWarehouseBlocksDto,
+    ) {
+        return this.warehousesService.blockCells(id, body.labels);
+    }
+
+    @Delete(":id/blocks")
+    async unblockCells(
+        @Param("id", ParseIntPipe) id: number,
+        @Body() body: UpdateWarehouseBlocksDto,
+    ) {
+        return this.warehousesService.unblockCells(id, body.labels);
     }
 
     @Patch(":id")

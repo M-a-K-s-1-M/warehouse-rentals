@@ -18,12 +18,19 @@ export class RentalsService {
         colEnd: number;
         extraContactName?: string;
         extraContactEmail?: string;
+        color?: string;
     }) {
         this.assertDateOrder(input.startDate, input.endDate);
         const warehouse = await this.getWarehouse(input.warehouseId);
         this.assertGridBounds(warehouse.gridRows, warehouse.gridCols, input);
 
-        const totals = this.calculateTotals(warehouse.cellSquare, warehouse.pricePerCell, input);
+        const totals = this.calculateTotals(
+            warehouse.cellSquare,
+            warehouse.pricePerCell,
+            input,
+            input.startDate,
+            input.endDate,
+        );
         await this.assertNoOverlap({
             warehouseId: warehouse.id,
             startDate: input.startDate,
@@ -53,6 +60,7 @@ export class RentalsService {
                 totalPrice: totals.totalPrice,
                 extraContactName: input.extraContactName ?? null,
                 extraContactEmail: input.extraContactEmail ?? null,
+                color: input.color ?? null,
                 rentalStatus,
             },
         });
@@ -91,6 +99,7 @@ export class RentalsService {
             extraContactName?: string;
             extraContactEmail?: string;
             rentalStatus?: RentalStatusType;
+            color?: string;
         },
     ) {
         const existing = await this.getRental(id);
@@ -114,12 +123,13 @@ export class RentalsService {
             colEnd,
         });
 
-        const totals = this.calculateTotals(warehouse.cellSquare, warehouse.pricePerCell, {
-            rowStart,
-            rowEnd,
-            colStart,
-            colEnd,
-        });
+        const totals = this.calculateTotals(
+            warehouse.cellSquare,
+            warehouse.pricePerCell,
+            { rowStart, rowEnd, colStart, colEnd },
+            startDate,
+            endDate,
+        );
 
         await this.assertNoOverlap({
             warehouseId: warehouse.id,
@@ -156,6 +166,7 @@ export class RentalsService {
                     input.extraContactEmail === undefined
                         ? existing.extraContactEmail
                         : input.extraContactEmail,
+                color: input.color === undefined ? existing.color : input.color,
                 rentalStatus: input.rentalStatus ?? this.getRentalStatus(startDate, endDate),
             },
         });
@@ -194,10 +205,14 @@ export class RentalsService {
         cellSquare: number,
         pricePerCell: number,
         input: { rowStart: number; rowEnd: number; colStart: number; colEnd: number },
+        startDate: Date,
+        endDate: Date,
     ) {
         const totalCells = (input.rowEnd - input.rowStart + 1) * (input.colEnd - input.colStart + 1);
         const areaSquare = totalCells * cellSquare;
-        const totalPrice = totalCells * pricePerCell;
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+        const totalPrice = totalCells * pricePerCell * days;
 
         return { totalCells, areaSquare, pricePerCell, totalPrice };
     }
