@@ -244,10 +244,11 @@ export function TenantsList() {
 
                         {openedTenantId === tenant.id && (
                             <div className="border-t border-gray-200 px-5 pb-4">
-                                <div className="grid grid-cols-1 gap-3 py-4 text-xs font-semibold text-gray-400 sm:grid-cols-4">
+                                <div className="grid grid-cols-1 gap-3 py-4 text-xs font-semibold text-gray-400 sm:grid-cols-5">
                                     <div>СКЛАД</div>
                                     <div>СЕКЦИЯ</div>
                                     <div>ПЛОЩАДЬ</div>
+                                    <div>СУММА</div>
                                     <div className="text-right">СРОК ДО</div>
                                 </div>
                                 <div className="space-y-3">
@@ -259,13 +260,14 @@ export function TenantsList() {
                                         tenantRentals.map((rental) => (
                                             <div
                                                 key={rental.id}
-                                                className="grid grid-cols-1 items-center gap-3 rounded-md border border-gray-200 px-4 py-3 text-sm sm:grid-cols-4"
+                                                className="grid grid-cols-1 items-center gap-3 rounded-md border border-gray-200 px-4 py-3 text-sm sm:grid-cols-5"
                                             >
                                                 <div className="font-semibold">
                                                     {warehousesById.get(rental.warehouseId) ?? `Склад #${rental.warehouseId}`}
                                                 </div>
                                                 <div>{`${String.fromCharCode(64 + rental.rowStart)}${rental.colStart}-${String.fromCharCode(64 + rental.rowEnd)}${rental.colEnd}`}</div>
                                                 <div>{formatArea(rental.areaSquare)} кв.м</div>
+                                                <div>{formatCurrency(rental.totalPrice)} руб</div>
                                                 <div className="text-right">
                                                     {new Date(rental.endDate).toLocaleDateString("ru-RU")}
                                                 </div>

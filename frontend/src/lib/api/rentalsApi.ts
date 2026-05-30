@@ -3,12 +3,15 @@ import { IRental } from "../types";
 
 export class RentalsApi {
     static async listRentals(warehouseId?: number, userId?: string): Promise<IRental[]> {
-        const res = await $api.get("/rentals", {
-            params: {
-                warehouseId,
-                userId,
-            },
-        });
+        const params: { warehouseId?: number; userId?: string } = {};
+        if (warehouseId !== undefined) {
+            params.warehouseId = warehouseId;
+        }
+        if (userId !== undefined) {
+            params.userId = userId;
+        }
+
+        const res = await $api.get("/rentals", { params });
         return res.data;
     }
 
