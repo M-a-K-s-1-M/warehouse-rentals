@@ -262,12 +262,9 @@ export function WarehouseGrid() {
             photoFile?: File | null;
             photoKind?: string;
         }) => {
-            const selectionInfo = selectedLabels.length
-                ? `\n\nЯчейки: ${selectedLabels.map((label) => label.toUpperCase()).join(", ")}`
-                : "";
             const application = await ApplicationsApi.createApplication({
                 warehouseId,
-                description: `${input.description.trim()}${selectionInfo}`,
+                description: input.description.trim(),
             });
 
             if (input.engineerIds.length > 0) {

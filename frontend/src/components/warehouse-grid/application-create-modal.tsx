@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, FileInput, Group, Modal, MultiSelect, Select, Text, Textarea } from "@mantine/core";
+import { Button, FileInput, Group, Modal, MultiSelect, Select, Text, TextInput, Textarea } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
 import type { IUser } from "@/lib";
 
@@ -71,6 +71,13 @@ export function ApplicationCreateModal({
                         Ячейки: {selectionLabel || "не выбраны"}
                     </Text>
                 </div>
+
+                <TextInput
+                    label="Ячейки"
+                    value={selectionLabel}
+                    readOnly
+                    disabled
+                />
 
                 <MultiSelect
                     label="Инженеры"
