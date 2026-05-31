@@ -11,6 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApplicationsController = void 0;
 const common_1 = require("@nestjs/common");
@@ -25,6 +28,11 @@ const update_application_open_status_dto_1 = require("./dto/update-application-o
 const assign_engineers_dto_1 = require("./dto/assign-engineers.dto");
 const add_application_photo_dto_1 = require("./dto/add-application-photo.dto");
 const update_application_description_dto_1 = require("./dto/update-application-description.dto");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const crypto_1 = require("crypto");
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 let ApplicationsController = class ApplicationsController {
     applicationsService;
     constructor(applicationsService) {
@@ -45,7 +53,20 @@ let ApplicationsController = class ApplicationsController {
         });
     }
     async listApplications(status, openStatus, userId, warehouseId) {
-        return this.applicationsService.listApplications({ status, openStatus, userId, warehouseId });
+        let resolvedWarehouseId = undefined;
+        if (warehouseId !== undefined) {
+            const parsed = Number(warehouseId);
+            if (!Number.isFinite(parsed)) {
+                throw new common_1.BadRequestException("Некорректный идентификатор склада");
+            }
+            resolvedWarehouseId = parsed;
+        }
+        return this.applicationsService.listApplications({
+            status,
+            openStatus,
+            userId,
+            warehouseId: resolvedWarehouseId,
+        });
     }
     async getApplication(id) {
         return this.applicationsService.getApplicationById(id);
@@ -70,6 +91,15 @@ let ApplicationsController = class ApplicationsController {
             uploadedById: req.user?.id,
         });
     }
+    async uploadPhoto(id, file, kind, req) {
+        const relativePath = `/uploads/applications/${file.filename}`;
+        return this.applicationsService.addPhoto({
+            applicationId: id,
+            url: relativePath,
+            kind,
+            uploadedById: req.user?.id,
+        });
+    }
     async updateDescription(id, body) {
         return this.applicationsService.updateDescription(id, body.description);
     }
@@ -88,9 +118,9 @@ __decorate([
     __param(0, (0, common_1.Query)("status")),
     __param(1, (0, common_1.Query)("openStatus")),
     __param(2, (0, common_1.Query)("userId")),
-    __param(3, (0, common_1.Query)("warehouseId", common_1.ParseIntPipe)),
+    __param(3, (0, common_1.Query)("warehouseId")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Number]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ApplicationsController.prototype, "listApplications", null);
 __decorate([
@@ -137,6 +167,30 @@ __decorate([
     __metadata("design:paramtypes", [String, add_application_photo_dto_1.AddApplicationPhotoDto, Object]),
     __metadata("design:returntype", Promise)
 ], ApplicationsController.prototype, "addPhoto", null);
+__decorate([
+    (0, common_1.Post)(":id/photos/upload"),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
+        storage: (0, multer_1.diskStorage)({
+            destination: (req, file, cb) => {
+                const dest = path_1.default.join(process.cwd(), "uploads", "applications");
+                fs_1.default.mkdirSync(dest, { recursive: true });
+                cb(null, dest);
+            },
+            filename: (req, file, cb) => {
+                const ext = path_1.default.extname(file.originalname || "");
+                cb(null, `${(0, crypto_1.randomUUID)()}${ext}`);
+            },
+        }),
+    })),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Body)("kind")),
+    __param(3, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object, Object]),
+    __metadata("design:returntype", Promise)
+], ApplicationsController.prototype, "uploadPhoto", null);
 __decorate([
     (0, common_1.Patch)(":id/description"),
     (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER),

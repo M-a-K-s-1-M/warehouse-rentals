@@ -1,12 +1,13 @@
 'use client'
 
 import { RentalCreateModal } from "@/components";
-import { RentalsApi, UsersApi, WarehousesApi } from "@/lib";
+import { ApplicationsApi, RentalsApi, UsersApi, WarehousesApi } from "@/lib";
 import { Button, Group, Modal, Skeleton, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { ApplicationCreateModal } from "./application-create-modal";
 
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const cellSize = 40;
@@ -104,6 +105,7 @@ export function WarehouseGrid() {
     const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
     const [confirmAction, setConfirmAction] = useState<"block" | "unblock" | null>(null);
     const [isRentalOpen, setIsRentalOpen] = useState(false);
+    const [isApplicationOpen, setIsApplicationOpen] = useState(false);
 
     const { data: warehouse, isLoading, error } = useQuery({
         queryKey: ["warehouse", warehouseId],
@@ -130,6 +132,11 @@ export function WarehouseGrid() {
 
     const tenants = useMemo(
         () => (users ?? []).filter((user) => user.role === "CLIENT"),
+        [users],
+    );
+
+    const engineers = useMemo(
+        () => (users ?? []).filter((user) => user.role === "ENGINEER"),
         [users],
     );
 
@@ -243,6 +250,57 @@ export function WarehouseGrid() {
             notifications.show({
                 title: "Ошибка аренды",
                 message: "Не удалось создать аренду.",
+                color: "red",
+            });
+        },
+    });
+
+    const createApplicationMutation = useMutation({
+        mutationFn: async (input: {
+            description: string;
+            engineerIds: string[];
+            photoFile?: File | null;
+            photoKind?: string;
+        }) => {
+            const selectionInfo = selectedLabels.length
+                ? `\n\nЯчейки: ${selectedLabels.map((label) => label.toUpperCase()).join(", ")}`
+                : "";
+            const application = await ApplicationsApi.createApplication({
+                warehouseId,
+                description: `${input.description.trim()}${selectionInfo}`,
+            });
+
+            if (input.engineerIds.length > 0) {
+                await ApplicationsApi.assignEngineers({
+                    applicationId: application.id,
+                    engineerIds: input.engineerIds,
+                });
+            }
+
+            if (input.photoFile) {
+                await ApplicationsApi.uploadPhoto({
+                    applicationId: application.id,
+                    file: input.photoFile,
+                    kind: input.photoKind ?? "BREAKDOWN",
+                });
+            }
+
+            return application;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["applications"] });
+            setSelectedLabels([]);
+            setIsApplicationOpen(false);
+            notifications.show({
+                title: "Заявка создана",
+                message: "Заявка успешно создана.",
+                color: "green",
+            });
+        },
+        onError: () => {
+            notifications.show({
+                title: "Ошибка заявки",
+                message: "Не удалось создать заявку.",
                 color: "red",
             });
         },
@@ -472,6 +530,9 @@ export function WarehouseGrid() {
                             {allSelectedBlocked ? "Разблокировать блоки" : "Заблокировать блоки"}
                         </Button>
                         <Button onClick={handleOpenRental}>Создать аренду</Button>
+                        <Button variant="outline" onClick={() => setIsApplicationOpen(true)}>
+                            Создать заявку
+                        </Button>
                     </Group>
                 </Group>
             )}
@@ -514,6 +575,26 @@ export function WarehouseGrid() {
                         : 0
                 }
                 pricePerCell={warehouse.pricePerCell}
+            />
+
+            <ApplicationCreateModal
+                opened={isApplicationOpen}
+                onClose={() => setIsApplicationOpen(false)}
+                onSubmit={(values) => {
+                    if (!hasSelection) {
+                        notifications.show({
+                            title: "Нет выбора",
+                            message: "Сначала выберите блоки.",
+                            color: "orange",
+                        });
+                        return;
+                    }
+                    createApplicationMutation.mutate(values);
+                }}
+                isSubmitting={createApplicationMutation.isPending}
+                engineers={engineers}
+                selectedLabels={selectedLabels}
+                warehouseTitle={warehouse.title}
             />
         </div>
     );

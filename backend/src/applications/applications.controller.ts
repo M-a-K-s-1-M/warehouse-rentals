@@ -9,7 +9,9 @@ import {
     Query,
     Req,
     UseGuards,
-    ParseIntPipe,
+    BadRequestException,
+    UploadedFile,
+    UseInterceptors,
 } from "@nestjs/common";
 import { ApplicationOpenStatus, ApplicationStatus, RoleType } from "@prisma/client";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -22,6 +24,11 @@ import { UpdateApplicationOpenStatusDto } from "./dto/update-application-open-st
 import { AssignEngineersDto } from "./dto/assign-engineers.dto";
 import { AddApplicationPhotoDto } from "./dto/add-application-photo.dto";
 import { UpdateApplicationDescriptionDto } from "./dto/update-application-description.dto";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { randomUUID } from "crypto";
+import path from "path";
+import fs from "fs";
 
 @Controller("applications")
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -51,9 +58,23 @@ export class ApplicationsController {
         @Query("status") status?: ApplicationStatus,
         @Query("openStatus") openStatus?: ApplicationOpenStatus,
         @Query("userId") userId?: string,
-        @Query("warehouseId", ParseIntPipe) warehouseId?: number,
+        @Query("warehouseId") warehouseId?: string,
     ) {
-        return this.applicationsService.listApplications({ status, openStatus, userId, warehouseId });
+        let resolvedWarehouseId: number | undefined = undefined;
+        if (warehouseId !== undefined) {
+            const parsed = Number(warehouseId);
+            if (!Number.isFinite(parsed)) {
+                throw new BadRequestException("Некорректный идентификатор склада");
+            }
+            resolvedWarehouseId = parsed;
+        }
+
+        return this.applicationsService.listApplications({
+            status,
+            openStatus,
+            userId,
+            warehouseId: resolvedWarehouseId,
+        });
     }
 
     @Get(":id")
@@ -93,6 +114,38 @@ export class ApplicationsController {
             applicationId: id,
             url: body.url,
             kind: body.kind,
+            uploadedById: req.user?.id,
+        });
+    }
+
+    @Post(":id/photos/upload")
+    @Roles(RoleType.MANAGER, RoleType.ENGINEER)
+    @UseInterceptors(
+        FileInterceptor("file", {
+            storage: diskStorage({
+                destination: (req, file, cb) => {
+                    const dest = path.join(process.cwd(), "uploads", "applications");
+                    fs.mkdirSync(dest, { recursive: true });
+                    cb(null, dest);
+                },
+                filename: (req, file, cb) => {
+                    const ext = path.extname(file.originalname || "");
+                    cb(null, `${randomUUID()}${ext}`);
+                },
+            }),
+        }),
+    )
+    async uploadPhoto(
+        @Param("id") id: string,
+        @UploadedFile() file: Express.Multer.File,
+        @Body("kind") kind: AddApplicationPhotoDto["kind"],
+        @Req() req: { user?: { id: string } },
+    ) {
+        const relativePath = `/uploads/applications/${file.filename}`;
+        return this.applicationsService.addPhoto({
+            applicationId: id,
+            url: relativePath,
+            kind,
             uploadedById: req.user?.id,
         });
     }

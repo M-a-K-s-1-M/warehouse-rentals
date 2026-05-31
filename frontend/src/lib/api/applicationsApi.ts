@@ -7,6 +7,11 @@ export class ApplicationsApi {
         return res.data;
     }
 
+    static async createApplication(input: { warehouseId: number; description: string }) {
+        const res = await $api.post("/applications", input);
+        return res.data as IApplication;
+    }
+
     static async updateStatus(input: { applicationId: string; status: string }) {
         const res = await $api.patch(`/applications/${input.applicationId}/status`, {
             status: input.status,
@@ -32,6 +37,18 @@ export class ApplicationsApi {
         const res = await $api.post(`/applications/${input.applicationId}/photos`, {
             url: input.url,
             kind: input.kind,
+        });
+        return res.data;
+    }
+
+    static async uploadPhoto(input: { applicationId: string; file: File; kind: string }) {
+        const data = new FormData();
+        data.append("file", input.file);
+        data.append("kind", input.kind);
+        const res = await $api.post(`/applications/${input.applicationId}/photos/upload`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
         });
         return res.data;
     }

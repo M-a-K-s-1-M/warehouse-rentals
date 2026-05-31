@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
+import express from "express";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
   app.use(cookieParser());
+  app.use("/uploads", express.static("uploads"));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

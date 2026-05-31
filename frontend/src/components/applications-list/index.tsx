@@ -1,7 +1,7 @@
 'use client';
 
 import { ApplicationsApi, AuthApi, UsersApi, WarehousesApi } from "@/lib";
-import { Badge, Button, MultiSelect, Select, Text, Textarea, TextInput } from "@mantine/core";
+import { Badge, Button, FileInput, MultiSelect, Select, Text, Textarea } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
@@ -20,6 +20,9 @@ const PHOTO_KIND_OPTIONS = [
     { value: "BREAKDOWN", label: "Поломка" },
     { value: "REPAIR", label: "Ремонт" },
 ];
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
 function formatDate(value: string) {
     return new Date(value).toLocaleDateString("ru-RU");
@@ -43,7 +46,9 @@ export function ApplicationsList() {
     const [openedId, setOpenedId] = useState<string | null>(null);
     const [assignments, setAssignments] = useState<Record<string, string[]>>({});
     const [descriptionDrafts, setDescriptionDrafts] = useState<Record<string, string>>({});
-    const [photoDrafts, setPhotoDrafts] = useState<Record<string, { url: string; kind: string }>>({});
+    const [photoDrafts, setPhotoDrafts] = useState<Record<string, { file: File | null; kind: string }>>({});
+    const [statusFilter, setStatusFilter] = useState<string | null>(null);
+    const [warehouseFilter, setWarehouseFilter] = useState<string | null>(null);
 
     const { data: currentUser } = useQuery({
         queryKey: ["me"],
@@ -113,7 +118,7 @@ export function ApplicationsList() {
             const next = { ...prev };
             applications.forEach((application) => {
                 if (!next[application.id]) {
-                    next[application.id] = { url: "", kind: "BREAKDOWN" };
+                    next[application.id] = { file: null, kind: "BREAKDOWN" };
                 }
             });
             return next;
@@ -126,6 +131,15 @@ export function ApplicationsList() {
         return map;
     }, [warehouses]);
 
+    const warehouseOptions = useMemo(
+        () =>
+            (warehouses ?? []).map((warehouse) => ({
+                value: String(warehouse.id),
+                label: warehouse.title,
+            })),
+        [warehouses],
+    );
+
     const engineerOptions = useMemo(() => {
         return (users ?? [])
             .filter((user) => user.role === "ENGINEER")
@@ -137,16 +151,24 @@ export function ApplicationsList() {
 
     const visibleApplications = useMemo(() => {
         const list = applications ?? [];
+        const statusFiltered = statusFilter
+            ? list.filter((application) => application.status === statusFilter)
+            : list;
+        const warehouseFiltered = warehouseFilter
+            ? statusFiltered.filter((application) =>
+                String(application.warehouseId) === warehouseFilter,
+            )
+            : statusFiltered;
         if (isEngineer && currentUser?.id) {
-            return list.filter((application) =>
+            return warehouseFiltered.filter((application) =>
                 application.engineers.some((engineer) => engineer.engineerId === currentUser.id),
             );
         }
         if (isClient && currentUser?.id) {
-            return list.filter((application) => application.userId === currentUser.id);
+            return warehouseFiltered.filter((application) => application.userId === currentUser.id);
         }
-        return list;
-    }, [applications, currentUser?.id, isClient, isEngineer]);
+        return warehouseFiltered;
+    }, [applications, currentUser?.id, isClient, isEngineer, statusFilter, warehouseFilter]);
 
     const assignEngineersMutation = useMutation({
         mutationFn: (input: { applicationId: string; engineerIds: string[] }) =>
@@ -209,8 +231,8 @@ export function ApplicationsList() {
     });
 
     const addPhotoMutation = useMutation({
-        mutationFn: (input: { applicationId: string; url: string; kind: string }) =>
-            ApplicationsApi.addPhoto(input),
+        mutationFn: (input: { applicationId: string; file: File; kind: string }) =>
+            ApplicationsApi.uploadPhoto(input),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["applications"] });
             notifications.show({
@@ -242,13 +264,40 @@ export function ApplicationsList() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <Text fw={700} size="xl">
-                    Заявки
-                </Text>
-                <Text size="sm" c="dimmed">
-                    Управляйте обращениями клиентов и работой инженеров
-                </Text>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <Text fw={700} size="xl">
+                        Заявки
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        Управляйте обращениями клиентов и работой инженеров
+                    </Text>
+                </div>
+                <div className="flex flex-wrap items-end gap-3">
+                    <Select
+                        label="Статус"
+                        placeholder="Все статусы"
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                        data={STATUS_OPTIONS.map((option) => ({
+                            value: option.value,
+                            label: option.label,
+                        }))}
+                        clearable
+                        w={220}
+                    />
+                    <Select
+                        label="Склад"
+                        placeholder="Все склады"
+                        value={warehouseFilter}
+                        onChange={setWarehouseFilter}
+                        data={warehouseOptions}
+                        clearable
+                        searchable
+                        nothingFoundMessage="Склады не найдены"
+                        w={260}
+                    />
+                </div>
             </div>
 
             <div className="space-y-4">
@@ -258,7 +307,7 @@ export function ApplicationsList() {
                         application.warehouse?.title ??
                         warehousesById.get(application.warehouseId) ??
                         `Склад #${application.warehouseId}`;
-                    const photoDraft = photoDrafts[application.id] ?? { url: "", kind: "BREAKDOWN" };
+                    const photoDraft = photoDrafts[application.id] ?? { file: null, kind: "BREAKDOWN" };
 
                     return (
                         <div key={application.id} className="rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -338,35 +387,59 @@ export function ApplicationsList() {
                                                     </Text>
                                                 ) : (
                                                     <div className="flex flex-wrap gap-3">
-                                                        {application.photos.map((photo) => (
-                                                            <div
-                                                                key={photo.id}
-                                                                className="h-28 w-40 overflow-hidden rounded-md border border-gray-200"
-                                                            >
-                                                                <img
-                                                                    src={photo.url}
-                                                                    alt={photo.kind}
-                                                                    className="h-full w-full object-cover"
-                                                                />
-                                                            </div>
-                                                        ))}
+                                                        {application.photos.map((photo) => {
+                                                            const photoUrl = photo.url.startsWith("http")
+                                                                ? photo.url
+                                                                : `${API_ORIGIN}${photo.url}`;
+
+                                                            return (
+                                                                <div
+                                                                    key={photo.id}
+                                                                    className="h-28 w-40 overflow-hidden rounded-md border border-gray-200"
+                                                                >
+                                                                    <img
+                                                                        src={photoUrl}
+                                                                        alt={photo.kind}
+                                                                        className="h-full w-full object-cover"
+                                                                    />
+                                                                    <div className="flex items-center justify-between gap-2 border-t border-gray-200 bg-white px-2 py-1 text-[11px]">
+                                                                        <a
+                                                                            href={photoUrl}
+                                                                            target="_blank"
+                                                                            rel="noreferrer"
+                                                                            className="text-blue-600 hover:underline"
+                                                                        >
+                                                                            Открыть
+                                                                        </a>
+                                                                        <a
+                                                                            href={photoUrl}
+                                                                            download
+                                                                            className="text-blue-600 hover:underline"
+                                                                        >
+                                                                            Скачать
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 )}
 
                                                 {(isEngineer || isManager) && (
                                                     <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[2fr,1fr,auto]">
-                                                        <TextInput
-                                                            placeholder="Ссылка на фото"
-                                                            value={photoDraft.url}
-                                                            onChange={(event) =>
+                                                        <FileInput
+                                                            placeholder="Выберите файл"
+                                                            value={photoDraft.file}
+                                                            onChange={(file) =>
                                                                 setPhotoDrafts((prev) => ({
                                                                     ...prev,
                                                                     [application.id]: {
                                                                         ...photoDraft,
-                                                                        url: event.currentTarget.value,
+                                                                        file,
                                                                     },
                                                                 }))
                                                             }
+                                                            accept="image/*"
                                                         />
                                                         <Select
                                                             data={PHOTO_KIND_OPTIONS}
@@ -383,24 +456,24 @@ export function ApplicationsList() {
                                                         />
                                                         <Button
                                                             onClick={() => {
-                                                                if (!photoDraft.url.trim()) {
+                                                                if (!photoDraft.file) {
                                                                     notifications.show({
-                                                                        title: "Нужна ссылка",
-                                                                        message: "Укажите ссылку на фото.",
+                                                                        title: "Нужен файл",
+                                                                        message: "Выберите фото для загрузки.",
                                                                         color: "orange",
                                                                     });
                                                                     return;
                                                                 }
                                                                 addPhotoMutation.mutate({
                                                                     applicationId: application.id,
-                                                                    url: photoDraft.url.trim(),
+                                                                    file: photoDraft.file,
                                                                     kind: photoDraft.kind,
                                                                 });
                                                                 setPhotoDrafts((prev) => ({
                                                                     ...prev,
                                                                     [application.id]: {
                                                                         ...photoDraft,
-                                                                        url: "",
+                                                                        file: null,
                                                                     },
                                                                 }));
                                                             }}

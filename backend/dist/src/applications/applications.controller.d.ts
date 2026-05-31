@@ -16,8 +16,8 @@ export declare class ApplicationsController {
         };
     }): Promise<{
         warehouse: {
-            description: string | null;
             id: number;
+            description: string | null;
             createdAt: Date;
             title: string;
             address: string;
@@ -60,18 +60,18 @@ export declare class ApplicationsController {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
         createdAt: Date;
         warehouseId: number;
         userId: string;
     }>;
-    listApplications(status?: ApplicationStatus, openStatus?: ApplicationOpenStatus, userId?: string, warehouseId?: number): Promise<({
+    listApplications(status?: ApplicationStatus, openStatus?: ApplicationOpenStatus, userId?: string, warehouseId?: string): Promise<({
         warehouse: {
-            description: string | null;
             id: number;
+            description: string | null;
             createdAt: Date;
             title: string;
             address: string;
@@ -114,18 +114,18 @@ export declare class ApplicationsController {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
         createdAt: Date;
         warehouseId: number;
         userId: string;
     })[]>;
     getApplication(id: string): Promise<{
         warehouse: {
-            description: string | null;
             id: number;
+            description: string | null;
             createdAt: Date;
             title: string;
             address: string;
@@ -168,28 +168,28 @@ export declare class ApplicationsController {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
         createdAt: Date;
         warehouseId: number;
         userId: string;
     }>;
     updateStatus(id: string, body: UpdateApplicationStatusDto): Promise<{
+        id: string;
         description: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
         createdAt: Date;
         warehouseId: number;
         userId: string;
     }>;
     updateOpenStatus(id: string, body: UpdateApplicationOpenStatusDto): Promise<{
+        id: string;
         description: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
         createdAt: Date;
         warehouseId: number;
         userId: string;
@@ -208,10 +208,10 @@ export declare class ApplicationsController {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
         createdAt: Date;
         warehouseId: number;
         userId: string;
@@ -228,11 +228,23 @@ export declare class ApplicationsController {
         uploadedById: string | null;
         applicationId: string;
     }>;
+    uploadPhoto(id: string, file: Express.Multer.File, kind: AddApplicationPhotoDto["kind"], req: {
+        user?: {
+            id: string;
+        };
+    }): Promise<{
+        id: string;
+        createdAt: Date;
+        kind: import("@prisma/client").$Enums.PhotoKind;
+        url: string;
+        uploadedById: string | null;
+        applicationId: string;
+    }>;
     updateDescription(id: string, body: UpdateApplicationDescriptionDto): Promise<{
+        id: string;
         description: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
         createdAt: Date;
         warehouseId: number;
         userId: string;
