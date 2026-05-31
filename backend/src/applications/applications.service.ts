@@ -8,10 +8,14 @@ import {
 } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { ApplicationsGateway } from "./applications.gateway";
 
 @Injectable()
 export class ApplicationsService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly gateway: ApplicationsGateway,
+    ) { }
 
     private readonly engineerSelect = {
         id: true,
@@ -31,7 +35,7 @@ export class ApplicationsService {
             uploadedById?: string;
         }>;
     }) {
-        return this.prisma.application.create({
+        const application = await this.prisma.application.create({
             data: {
                 warehouseId: input.warehouseId,
                 userId: input.userId,
@@ -49,8 +53,27 @@ export class ApplicationsService {
             },
             include: {
                 photos: true,
+                user: true,
+                warehouse: true,
+                engineers: {
+                    include: {
+                        engineer: {
+                            select: this.engineerSelect,
+                        },
+                    },
+                    orderBy: {
+                        assignedAt: "desc",
+                    },
+                },
             },
         });
+
+        this.gateway.emitApplicationEvent({
+            type: "created",
+            applicationId: application.id,
+        });
+
+        return application;
     }
 
     async addPhoto(input: {
@@ -59,7 +82,7 @@ export class ApplicationsService {
         kind: PhotoKind;
         uploadedById?: string;
     }) {
-        return this.prisma.applicationPhoto.create({
+        const photo = await this.prisma.applicationPhoto.create({
             data: {
                 applicationId: input.applicationId,
                 url: input.url,
@@ -67,6 +90,13 @@ export class ApplicationsService {
                 uploadedById: input.uploadedById ?? null,
             },
         });
+
+        this.gateway.emitApplicationEvent({
+            type: "photo",
+            applicationId: input.applicationId,
+        });
+
+        return photo;
     }
 
     async getApplicationById(id: string) {
@@ -111,6 +141,8 @@ export class ApplicationsService {
             where,
             include: {
                 photos: true,
+                user: true,
+                warehouse: true,
                 engineers: {
                     include: {
                         engineer: {
@@ -130,18 +162,32 @@ export class ApplicationsService {
 
     async updateStatus(id: string, status: ApplicationStatus) {
         await this.getApplicationById(id);
-        return this.prisma.application.update({
+        const application = await this.prisma.application.update({
             where: { id },
             data: { status },
         });
+
+        this.gateway.emitApplicationEvent({
+            type: "status",
+            applicationId: id,
+        });
+
+        return application;
     }
 
     async updateOpenStatus(id: string, openStatus: ApplicationOpenStatus) {
         await this.getApplicationById(id);
-        return this.prisma.application.update({
+        const application = await this.prisma.application.update({
             where: { id },
             data: { openStatus },
         });
+
+        this.gateway.emitApplicationEvent({
+            type: "openStatus",
+            applicationId: id,
+        });
+
+        return application;
     }
 
     async assignEngineers(input: { applicationId: string; engineerIds: string[] }) {
@@ -149,7 +195,7 @@ export class ApplicationsService {
         const uniqueEngineerIds = Array.from(new Set(input.engineerIds));
 
         if (uniqueEngineerIds.length === 0) {
-            return this.prisma.application.update({
+            const cleared = await this.prisma.application.update({
                 where: { id: application.id },
                 data: {
                     engineers: {
@@ -166,6 +212,13 @@ export class ApplicationsService {
                     },
                 },
             });
+
+            this.gateway.emitApplicationEvent({
+                type: "assigned",
+                applicationId: application.id,
+            });
+
+            return cleared;
         }
 
         const engineers = await this.prisma.user.findMany({
@@ -180,7 +233,7 @@ export class ApplicationsService {
             throw new BadRequestException("Можно назначать только инженеров");
         }
 
-        return this.prisma.application.update({
+        const updated = await this.prisma.application.update({
             where: { id: application.id },
             data: {
                 engineers: {
@@ -200,5 +253,27 @@ export class ApplicationsService {
                 },
             },
         });
+
+        this.gateway.emitApplicationEvent({
+            type: "assigned",
+            applicationId: application.id,
+        });
+
+        return updated;
+    }
+
+    async updateDescription(id: string, description: string) {
+        await this.getApplicationById(id);
+        const application = await this.prisma.application.update({
+            where: { id },
+            data: { description },
+        });
+
+        this.gateway.emitApplicationEvent({
+            type: "description",
+            applicationId: id,
+        });
+
+        return application;
     }
 }

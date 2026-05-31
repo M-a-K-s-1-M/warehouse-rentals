@@ -15,4 +15,16 @@ export class AuthApi {
         const res = await $api.post("/auth/logout");
         return res.data as { success: boolean };
     }
+
+    static async me() {
+        const res = await $api.get("/auth/me");
+        return res.data as {
+            id: string;
+            email: string;
+            role: string;
+            firstName?: string | null;
+            lastName?: string | null;
+            middleName?: string | null;
+        };
+    }
 }

@@ -1,20 +1,27 @@
 import {
     Body,
     Controller,
+    Get,
     Post,
     Req,
     Res,
     UnauthorizedException,
+    UseGuards,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { LogoutDto } from "./dto/logout.dto";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { UsersService } from "../users/users.service";
 
 @Controller("auth")
 export class AuthController {
-    constructor(private readonly authService: AuthService) { }
+    constructor(
+        private readonly authService: AuthService,
+        private readonly usersService: UsersService,
+    ) { }
 
     @Post("login")
     async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
@@ -63,6 +70,24 @@ export class AuthController {
         await this.authService.logout(token);
         this.clearAuthCookies(res);
         return { success: true };
+    }
+
+    @Get("me")
+    @UseGuards(JwtAuthGuard)
+    async me(@Req() req: { user?: { id: string } }) {
+        const userId = req.user?.id;
+        if (!userId) {
+            throw new UnauthorizedException("User not found");
+        }
+        const user = await this.usersService.getUser(userId);
+        return {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            middleName: user.middleName,
+        };
     }
 
     private setAuthCookies(res: Response, tokens: { accessToken: string; refreshToken: string; accessTokenExpiresIn: number; refreshTokenExpiresIn: number }) {

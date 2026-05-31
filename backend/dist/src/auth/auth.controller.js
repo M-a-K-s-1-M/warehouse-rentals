@@ -18,10 +18,14 @@ const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const refresh_dto_1 = require("./dto/refresh.dto");
 const logout_dto_1 = require("./dto/logout.dto");
+const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
+const users_service_1 = require("../users/users.service");
 let AuthController = class AuthController {
     authService;
-    constructor(authService) {
+    usersService;
+    constructor(authService, usersService) {
         this.authService = authService;
+        this.usersService = usersService;
     }
     async login(body, res) {
         const user = await this.authService.validateUser(body.email, body.password);
@@ -52,6 +56,21 @@ let AuthController = class AuthController {
         await this.authService.logout(token);
         this.clearAuthCookies(res);
         return { success: true };
+    }
+    async me(req) {
+        const userId = req.user?.id;
+        if (!userId) {
+            throw new common_1.UnauthorizedException("User not found");
+        }
+        const user = await this.usersService.getUser(userId);
+        return {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            middleName: user.middleName,
+        };
     }
     setAuthCookies(res, tokens) {
         const isProduction = process.env.NODE_ENV === "production";
@@ -101,8 +120,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, logout_dto_1.LogoutDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
+__decorate([
+    (0, common_1.Get)("me"),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "me", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)("auth"),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService,
+        users_service_1.UsersService])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map

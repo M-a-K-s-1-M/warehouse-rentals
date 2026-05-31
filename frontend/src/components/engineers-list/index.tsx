@@ -184,7 +184,7 @@ export function EngineersList() {
     };
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <Text fw={700} size="xl">

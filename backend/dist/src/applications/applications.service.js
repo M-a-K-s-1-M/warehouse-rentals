@@ -14,10 +14,13 @@ const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
 const common_2 = require("@nestjs/common");
+const applications_gateway_1 = require("./applications.gateway");
 let ApplicationsService = class ApplicationsService {
     prisma;
-    constructor(prisma) {
+    gateway;
+    constructor(prisma, gateway) {
         this.prisma = prisma;
+        this.gateway = gateway;
     }
     engineerSelect = {
         id: true,
@@ -26,7 +29,7 @@ let ApplicationsService = class ApplicationsService {
         createdAt: true,
     };
     async createApplication(input) {
-        return this.prisma.application.create({
+        const application = await this.prisma.application.create({
             data: {
                 warehouseId: input.warehouseId,
                 userId: input.userId,
@@ -44,11 +47,28 @@ let ApplicationsService = class ApplicationsService {
             },
             include: {
                 photos: true,
+                user: true,
+                warehouse: true,
+                engineers: {
+                    include: {
+                        engineer: {
+                            select: this.engineerSelect,
+                        },
+                    },
+                    orderBy: {
+                        assignedAt: "desc",
+                    },
+                },
             },
         });
+        this.gateway.emitApplicationEvent({
+            type: "created",
+            applicationId: application.id,
+        });
+        return application;
     }
     async addPhoto(input) {
-        return this.prisma.applicationPhoto.create({
+        const photo = await this.prisma.applicationPhoto.create({
             data: {
                 applicationId: input.applicationId,
                 url: input.url,
@@ -56,6 +76,11 @@ let ApplicationsService = class ApplicationsService {
                 uploadedById: input.uploadedById ?? null,
             },
         });
+        this.gateway.emitApplicationEvent({
+            type: "photo",
+            applicationId: input.applicationId,
+        });
+        return photo;
     }
     async getApplicationById(id) {
         const application = await this.prisma.application.findUnique({
@@ -92,6 +117,8 @@ let ApplicationsService = class ApplicationsService {
             where,
             include: {
                 photos: true,
+                user: true,
+                warehouse: true,
                 engineers: {
                     include: {
                         engineer: {
@@ -110,23 +137,33 @@ let ApplicationsService = class ApplicationsService {
     }
     async updateStatus(id, status) {
         await this.getApplicationById(id);
-        return this.prisma.application.update({
+        const application = await this.prisma.application.update({
             where: { id },
             data: { status },
         });
+        this.gateway.emitApplicationEvent({
+            type: "status",
+            applicationId: id,
+        });
+        return application;
     }
     async updateOpenStatus(id, openStatus) {
         await this.getApplicationById(id);
-        return this.prisma.application.update({
+        const application = await this.prisma.application.update({
             where: { id },
             data: { openStatus },
         });
+        this.gateway.emitApplicationEvent({
+            type: "openStatus",
+            applicationId: id,
+        });
+        return application;
     }
     async assignEngineers(input) {
         const application = await this.getApplicationById(input.applicationId);
         const uniqueEngineerIds = Array.from(new Set(input.engineerIds));
         if (uniqueEngineerIds.length === 0) {
-            return this.prisma.application.update({
+            const cleared = await this.prisma.application.update({
                 where: { id: application.id },
                 data: {
                     engineers: {
@@ -143,6 +180,11 @@ let ApplicationsService = class ApplicationsService {
                     },
                 },
             });
+            this.gateway.emitApplicationEvent({
+                type: "assigned",
+                applicationId: application.id,
+            });
+            return cleared;
         }
         const engineers = await this.prisma.user.findMany({
             where: {
@@ -154,7 +196,7 @@ let ApplicationsService = class ApplicationsService {
         if (engineers.length !== uniqueEngineerIds.length) {
             throw new common_2.BadRequestException("Можно назначать только инженеров");
         }
-        return this.prisma.application.update({
+        const updated = await this.prisma.application.update({
             where: { id: application.id },
             data: {
                 engineers: {
@@ -174,11 +216,29 @@ let ApplicationsService = class ApplicationsService {
                 },
             },
         });
+        this.gateway.emitApplicationEvent({
+            type: "assigned",
+            applicationId: application.id,
+        });
+        return updated;
+    }
+    async updateDescription(id, description) {
+        await this.getApplicationById(id);
+        const application = await this.prisma.application.update({
+            where: { id },
+            data: { description },
+        });
+        this.gateway.emitApplicationEvent({
+            type: "description",
+            applicationId: id,
+        });
+        return application;
     }
 };
 exports.ApplicationsService = ApplicationsService;
 exports.ApplicationsService = ApplicationsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        applications_gateway_1.ApplicationsGateway])
 ], ApplicationsService);
 //# sourceMappingURL=applications.service.js.map

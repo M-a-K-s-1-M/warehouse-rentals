@@ -20,6 +20,8 @@ import { CreateApplicationDto } from "./dto/create-application.dto";
 import { UpdateApplicationStatusDto } from "./dto/update-application-status.dto";
 import { UpdateApplicationOpenStatusDto } from "./dto/update-application-open-status.dto";
 import { AssignEngineersDto } from "./dto/assign-engineers.dto";
+import { AddApplicationPhotoDto } from "./dto/add-application-photo.dto";
+import { UpdateApplicationDescriptionDto } from "./dto/update-application-description.dto";
 
 @Controller("applications")
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -78,5 +80,29 @@ export class ApplicationsController {
             applicationId: id,
             engineerIds: body.engineerIds,
         });
+    }
+
+    @Post(":id/photos")
+    @Roles(RoleType.MANAGER, RoleType.ENGINEER)
+    async addPhoto(
+        @Param("id") id: string,
+        @Body() body: AddApplicationPhotoDto,
+        @Req() req: { user?: { id: string } },
+    ) {
+        return this.applicationsService.addPhoto({
+            applicationId: id,
+            url: body.url,
+            kind: body.kind,
+            uploadedById: req.user?.id,
+        });
+    }
+
+    @Patch(":id/description")
+    @Roles(RoleType.MANAGER, RoleType.ENGINEER)
+    async updateDescription(
+        @Param("id") id: string,
+        @Body() body: UpdateApplicationDescriptionDto,
+    ) {
+        return this.applicationsService.updateDescription(id, body.description);
     }
 }

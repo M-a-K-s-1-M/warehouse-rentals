@@ -23,6 +23,8 @@ const create_application_dto_1 = require("./dto/create-application.dto");
 const update_application_status_dto_1 = require("./dto/update-application-status.dto");
 const update_application_open_status_dto_1 = require("./dto/update-application-open-status.dto");
 const assign_engineers_dto_1 = require("./dto/assign-engineers.dto");
+const add_application_photo_dto_1 = require("./dto/add-application-photo.dto");
+const update_application_description_dto_1 = require("./dto/update-application-description.dto");
 let ApplicationsController = class ApplicationsController {
     applicationsService;
     constructor(applicationsService) {
@@ -59,6 +61,17 @@ let ApplicationsController = class ApplicationsController {
             applicationId: id,
             engineerIds: body.engineerIds,
         });
+    }
+    async addPhoto(id, body, req) {
+        return this.applicationsService.addPhoto({
+            applicationId: id,
+            url: body.url,
+            kind: body.kind,
+            uploadedById: req.user?.id,
+        });
+    }
+    async updateDescription(id, body) {
+        return this.applicationsService.updateDescription(id, body.description);
     }
 };
 exports.ApplicationsController = ApplicationsController;
@@ -114,6 +127,25 @@ __decorate([
     __metadata("design:paramtypes", [String, assign_engineers_dto_1.AssignEngineersDto]),
     __metadata("design:returntype", Promise)
 ], ApplicationsController.prototype, "assignEngineers", null);
+__decorate([
+    (0, common_1.Post)(":id/photos"),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, add_application_photo_dto_1.AddApplicationPhotoDto, Object]),
+    __metadata("design:returntype", Promise)
+], ApplicationsController.prototype, "addPhoto", null);
+__decorate([
+    (0, common_1.Patch)(":id/description"),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_application_description_dto_1.UpdateApplicationDescriptionDto]),
+    __metadata("design:returntype", Promise)
+], ApplicationsController.prototype, "updateDescription", null);
 exports.ApplicationsController = ApplicationsController = __decorate([
     (0, common_1.Controller)("applications"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
