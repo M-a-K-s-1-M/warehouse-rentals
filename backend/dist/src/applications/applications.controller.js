@@ -28,6 +28,7 @@ const update_application_open_status_dto_1 = require("./dto/update-application-o
 const assign_engineers_dto_1 = require("./dto/assign-engineers.dto");
 const add_application_photo_dto_1 = require("./dto/add-application-photo.dto");
 const update_application_description_dto_1 = require("./dto/update-application-description.dto");
+const update_application_comment_dto_1 = require("./dto/update-application-comment.dto");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const crypto_1 = require("crypto");
@@ -102,6 +103,12 @@ let ApplicationsController = class ApplicationsController {
     }
     async updateDescription(id, body) {
         return this.applicationsService.updateDescription(id, body.description);
+    }
+    async updateEngineerComment(id, body, req) {
+        if (!req.user) {
+            throw new common_1.ForbiddenException("User required");
+        }
+        return this.applicationsService.updateEngineerComment(id, body.comment, req.user);
     }
 };
 exports.ApplicationsController = ApplicationsController;
@@ -200,6 +207,16 @@ __decorate([
     __metadata("design:paramtypes", [String, update_application_description_dto_1.UpdateApplicationDescriptionDto]),
     __metadata("design:returntype", Promise)
 ], ApplicationsController.prototype, "updateDescription", null);
+__decorate([
+    (0, common_1.Patch)(":id/engineer-comment"),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_application_comment_dto_1.UpdateApplicationCommentDto, Object]),
+    __metadata("design:returntype", Promise)
+], ApplicationsController.prototype, "updateEngineerComment", null);
 exports.ApplicationsController = ApplicationsController = __decorate([
     (0, common_1.Controller)("applications"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

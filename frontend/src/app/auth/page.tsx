@@ -1,6 +1,6 @@
 'use client'
 
-import { AuthApi } from "@/lib";
+import { AuthApi, RoleType, getDefaultRouteByRole } from "@/lib";
 import { Button, Paper, PasswordInput, Text, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
@@ -20,13 +20,14 @@ export default function Auth() {
 
         try {
             setIsSubmitting(true);
-            await AuthApi.login({ email: email.trim(), password });
+            const response = await AuthApi.login({ email: email.trim(), password });
             notifications.show({
                 title: "Добро пожаловать",
                 message: "Вы успешно вошли в систему.",
                 color: "green",
             });
-            router.replace("/");
+            const role = response.user?.role as RoleType | undefined;
+            router.replace(role ? getDefaultRouteByRole(role) : "/");
         } catch {
             notifications.show({
                 title: "Ошибка входа",

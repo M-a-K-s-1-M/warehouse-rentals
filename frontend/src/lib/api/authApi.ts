@@ -1,18 +1,28 @@
 import { $api } from "../config";
+import { clearAccessToken, setAccessToken } from "../config/tokenStore";
 
 export class AuthApi {
     static async login(input: { email: string; password: string }) {
         const res = await $api.post("/auth/login", input);
-        return res.data as { user: { id: string; email: string; role: string } };
+        const data = res.data as {
+            user: { id: string; email: string; role: string };
+            accessToken: string;
+            accessTokenExpiresIn: number;
+        };
+        setAccessToken(data.accessToken);
+        return data;
     }
 
     static async refresh() {
         const res = await $api.post("/auth/refresh");
-        return res.data as { accessTokenExpiresIn: number };
+        const data = res.data as { accessToken: string; accessTokenExpiresIn: number };
+        setAccessToken(data.accessToken);
+        return data;
     }
 
     static async logout() {
         const res = await $api.post("/auth/logout");
+        clearAccessToken();
         return res.data as { success: boolean };
     }
 

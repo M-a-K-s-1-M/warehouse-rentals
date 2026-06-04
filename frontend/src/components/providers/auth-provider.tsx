@@ -1,6 +1,6 @@
 'use client';
 
-import { AuthApi, $api } from "@/lib";
+import { AuthApi, RoleType, getDefaultRouteByRole, $api } from "@/lib";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
@@ -80,9 +80,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     useEffect(() => {
         if (status === "checking") {
             runRefresh()
-                .then(() => {
+                .then(async () => {
                     if (isAuthRoute) {
-                        router.replace("/");
+                        const me = await AuthApi.me();
+                        router.replace(getDefaultRouteByRole(me.role as RoleType));
                     }
                 })
                 .catch(() => {

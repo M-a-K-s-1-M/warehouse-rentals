@@ -14,8 +14,11 @@ export declare class AuthController {
             email: string;
             role: import("@prisma/client").$Enums.RoleType;
         };
+        accessToken: string;
+        accessTokenExpiresIn: number;
     }>;
     refresh(res: Response, body: RefreshDto, req: Request): Promise<{
+        accessToken: string;
         accessTokenExpiresIn: number;
     }>;
     logout(res: Response, body: LogoutDto, req: Request): Promise<{

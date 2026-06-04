@@ -59,4 +59,11 @@ export class ApplicationsApi {
         });
         return res.data as IApplication;
     }
+
+    static async updateEngineerComment(input: { applicationId: string; comment: string }) {
+        const res = await $api.patch(`/applications/${input.applicationId}/engineer-comment`, {
+            comment: input.comment,
+        });
+        return res.data as IApplication;
+    }
 }

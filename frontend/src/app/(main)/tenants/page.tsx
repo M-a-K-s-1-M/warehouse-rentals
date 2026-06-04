@@ -1,12 +1,15 @@
 'use client'
 
-import { TenantsList } from "@/components"
+import { RoleGuard, TenantsList } from "@/components"
+import { RoleType } from "@/lib";
 
 export default function TenantsPage() {
 
     return (
-        <div className="p-[clamp(16px,4vw,32px)]">
-            <TenantsList />
-        </div>
+        <RoleGuard allowedRoles={[RoleType.MANAGER]}>
+            <div className="p-[clamp(16px,4vw,32px)]">
+                <TenantsList />
+            </div>
+        </RoleGuard>
     )
 }

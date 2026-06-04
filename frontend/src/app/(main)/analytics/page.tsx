@@ -1,7 +1,12 @@
 'use client'
 
+import { RoleGuard } from "@/components";
+import { RoleType } from "@/lib";
+
 export default function AnalyticsPage() {
     return (
-        <div className="p-[clamp(16px,4vw,32px)]">AnalyticsPage</div>
+        <RoleGuard allowedRoles={[RoleType.MANAGER]}>
+            <div className="p-[clamp(16px,4vw,32px)]">AnalyticsPage</div>
+        </RoleGuard>
     )
 }

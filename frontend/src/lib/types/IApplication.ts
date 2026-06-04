@@ -3,6 +3,7 @@ export interface IApplication {
     warehouseId: number;
     userId: string;
     description: string;
+    engineerComment?: string | null;
     status: string;
     openStatus: string;
     createdAt: string;

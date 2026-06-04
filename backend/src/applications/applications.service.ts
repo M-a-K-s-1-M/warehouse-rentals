@@ -276,4 +276,35 @@ export class ApplicationsService {
 
         return application;
     }
+
+    async updateEngineerComment(id: string, comment: string, user: { id: string; role: RoleType }) {
+        await this.getApplicationById(id);
+
+        if (user.role === RoleType.ENGINEER) {
+            const assignment = await this.prisma.applicationEngineer.findUnique({
+                where: {
+                    applicationId_engineerId: {
+                        applicationId: id,
+                        engineerId: user.id,
+                    },
+                },
+            });
+
+            if (!assignment) {
+                throw new BadRequestException("Инженер не назначен на заявку");
+            }
+        }
+
+        const application = await this.prisma.application.update({
+            where: { id },
+            data: { engineerComment: comment },
+        });
+
+        this.gateway.emitApplicationEvent({
+            type: "comment",
+            applicationId: id,
+        });
+
+        return application;
+    }
 }

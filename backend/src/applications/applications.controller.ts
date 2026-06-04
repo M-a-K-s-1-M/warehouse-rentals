@@ -24,6 +24,7 @@ import { UpdateApplicationOpenStatusDto } from "./dto/update-application-open-st
 import { AssignEngineersDto } from "./dto/assign-engineers.dto";
 import { AddApplicationPhotoDto } from "./dto/add-application-photo.dto";
 import { UpdateApplicationDescriptionDto } from "./dto/update-application-description.dto";
+import { UpdateApplicationCommentDto } from "./dto/update-application-comment.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { randomUUID } from "crypto";
@@ -157,5 +158,18 @@ export class ApplicationsController {
         @Body() body: UpdateApplicationDescriptionDto,
     ) {
         return this.applicationsService.updateDescription(id, body.description);
+    }
+
+    @Patch(":id/engineer-comment")
+    @Roles(RoleType.MANAGER, RoleType.ENGINEER)
+    async updateEngineerComment(
+        @Param("id") id: string,
+        @Body() body: UpdateApplicationCommentDto,
+        @Req() req: { user?: { id: string; role: RoleType } },
+    ) {
+        if (!req.user) {
+            throw new ForbiddenException("User required");
+        }
+        return this.applicationsService.updateEngineerComment(id, body.comment, req.user);
     }
 }

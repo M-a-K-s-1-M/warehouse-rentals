@@ -48,13 +48,17 @@ export const siteConfig: ISiteConfig = {
         ],
 
         ENGINEER: [
-            { name: 'Заявки', href: '/applications', icon: NewspaperIcon },
-            { name: 'Настройки', href: '/settings', icon: SettingsIcon },
+            { name: 'Заявки', href: '/applications-eng', icon: NewspaperIcon },
+            { name: 'Настройки', href: '/settings-eng', icon: SettingsIcon },
         ],
 
         CLIENT: [
-            { name: 'Заявки', href: '/applications', icon: NewspaperIcon },
-            { name: 'Настройки', href: '/settings', icon: SettingsIcon },
+            { name: 'Заявки', href: '/applications-cli', icon: NewspaperIcon },
+            { name: 'Настройки', href: '/settings-cli', icon: SettingsIcon },
         ]
     }
+}
+
+export function getDefaultRouteByRole(role: RoleType) {
+    return siteConfig.navLinks[role]?.[0]?.href ?? "/";
 }

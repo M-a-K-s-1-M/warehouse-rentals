@@ -36,6 +36,8 @@ export class AuthController {
                 email: user.email,
                 role: user.role,
             },
+            accessToken: tokens.accessToken,
+            accessTokenExpiresIn: tokens.accessTokenExpiresIn,
         };
     }
 
@@ -53,7 +55,10 @@ export class AuthController {
         const tokens = await this.authService.refreshTokens(token);
         this.setAuthCookies(res, tokens);
 
-        return { accessTokenExpiresIn: tokens.accessTokenExpiresIn };
+        return {
+            accessToken: tokens.accessToken,
+            accessTokenExpiresIn: tokens.accessTokenExpiresIn,
+        };
     }
 
     @Post("logout")

@@ -6,6 +6,7 @@ import { UpdateApplicationOpenStatusDto } from "./dto/update-application-open-st
 import { AssignEngineersDto } from "./dto/assign-engineers.dto";
 import { AddApplicationPhotoDto } from "./dto/add-application-photo.dto";
 import { UpdateApplicationDescriptionDto } from "./dto/update-application-description.dto";
+import { UpdateApplicationCommentDto } from "./dto/update-application-comment.dto";
 export declare class ApplicationsController {
     private readonly applicationsService;
     constructor(applicationsService: ApplicationsService);
@@ -15,23 +16,12 @@ export declare class ApplicationsController {
             role: RoleType;
         };
     }): Promise<{
-        user: {
-            id: string;
-            email: string;
-            passwordHash: string;
-            firstName: string | null;
-            lastName: string | null;
-            middleName: string | null;
-            phone: string | null;
-            createdAt: Date;
-            role: import("@prisma/client").$Enums.RoleType;
-        };
         warehouse: {
+            description: string | null;
             id: number;
             createdAt: Date;
             title: string;
             address: string;
-            description: string | null;
             square: number;
             cellSquare: number;
             gridRows: number;
@@ -39,53 +29,54 @@ export declare class ApplicationsController {
             pricePerCell: number;
             updatedAt: Date;
         };
-        photos: {
-            url: string;
+        user: {
             id: string;
             createdAt: Date;
-            applicationId: string;
-            uploadedById: string | null;
+            email: string;
+            passwordHash: string;
+            firstName: string | null;
+            lastName: string | null;
+            middleName: string | null;
+            phone: string | null;
+            role: import("@prisma/client").$Enums.RoleType;
+        };
+        photos: {
+            id: string;
+            createdAt: Date;
             kind: import("@prisma/client").$Enums.PhotoKind;
+            url: string;
+            uploadedById: string | null;
+            applicationId: string;
         }[];
         engineers: ({
             engineer: {
                 id: string;
-                email: string;
                 createdAt: Date;
+                email: string;
                 role: import("@prisma/client").$Enums.RoleType;
             };
         } & {
-            applicationId: string;
             assignedAt: Date;
+            applicationId: string;
             engineerId: string;
         })[];
     } & {
-        id: string;
-        createdAt: Date;
         description: string;
-        warehouseId: number;
-        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
     }>;
     listApplications(status?: ApplicationStatus, openStatus?: ApplicationOpenStatus, userId?: string, warehouseId?: string): Promise<({
-        user: {
-            id: string;
-            email: string;
-            passwordHash: string;
-            firstName: string | null;
-            lastName: string | null;
-            middleName: string | null;
-            phone: string | null;
-            createdAt: Date;
-            role: import("@prisma/client").$Enums.RoleType;
-        };
         warehouse: {
+            description: string | null;
             id: number;
             createdAt: Date;
             title: string;
             address: string;
-            description: string | null;
             square: number;
             cellSquare: number;
             gridRows: number;
@@ -93,53 +84,54 @@ export declare class ApplicationsController {
             pricePerCell: number;
             updatedAt: Date;
         };
-        photos: {
-            url: string;
+        user: {
             id: string;
             createdAt: Date;
-            applicationId: string;
-            uploadedById: string | null;
+            email: string;
+            passwordHash: string;
+            firstName: string | null;
+            lastName: string | null;
+            middleName: string | null;
+            phone: string | null;
+            role: import("@prisma/client").$Enums.RoleType;
+        };
+        photos: {
+            id: string;
+            createdAt: Date;
             kind: import("@prisma/client").$Enums.PhotoKind;
+            url: string;
+            uploadedById: string | null;
+            applicationId: string;
         }[];
         engineers: ({
             engineer: {
                 id: string;
-                email: string;
                 createdAt: Date;
+                email: string;
                 role: import("@prisma/client").$Enums.RoleType;
             };
         } & {
-            applicationId: string;
             assignedAt: Date;
+            applicationId: string;
             engineerId: string;
         })[];
     } & {
-        id: string;
-        createdAt: Date;
         description: string;
-        warehouseId: number;
-        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
     })[]>;
     getApplication(id: string): Promise<{
-        user: {
-            id: string;
-            email: string;
-            passwordHash: string;
-            firstName: string | null;
-            lastName: string | null;
-            middleName: string | null;
-            phone: string | null;
-            createdAt: Date;
-            role: import("@prisma/client").$Enums.RoleType;
-        };
         warehouse: {
+            description: string | null;
             id: number;
             createdAt: Date;
             title: string;
             address: string;
-            description: string | null;
             square: number;
             cellSquare: number;
             gridRows: number;
@@ -147,106 +139,137 @@ export declare class ApplicationsController {
             pricePerCell: number;
             updatedAt: Date;
         };
-        photos: {
-            url: string;
+        user: {
             id: string;
             createdAt: Date;
-            applicationId: string;
-            uploadedById: string | null;
+            email: string;
+            passwordHash: string;
+            firstName: string | null;
+            lastName: string | null;
+            middleName: string | null;
+            phone: string | null;
+            role: import("@prisma/client").$Enums.RoleType;
+        };
+        photos: {
+            id: string;
+            createdAt: Date;
             kind: import("@prisma/client").$Enums.PhotoKind;
+            url: string;
+            uploadedById: string | null;
+            applicationId: string;
         }[];
         engineers: ({
             engineer: {
                 id: string;
-                email: string;
                 createdAt: Date;
+                email: string;
                 role: import("@prisma/client").$Enums.RoleType;
             };
         } & {
-            applicationId: string;
             assignedAt: Date;
+            applicationId: string;
             engineerId: string;
         })[];
     } & {
-        id: string;
-        createdAt: Date;
         description: string;
-        warehouseId: number;
-        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
     }>;
     updateStatus(id: string, body: UpdateApplicationStatusDto): Promise<{
-        id: string;
-        createdAt: Date;
         description: string;
-        warehouseId: number;
-        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
     }>;
     updateOpenStatus(id: string, body: UpdateApplicationOpenStatusDto): Promise<{
-        id: string;
-        createdAt: Date;
         description: string;
-        warehouseId: number;
-        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
     }>;
     assignEngineers(id: string, body: AssignEngineersDto): Promise<{
         engineers: ({
             engineer: {
                 id: string;
-                email: string;
                 createdAt: Date;
+                email: string;
                 role: import("@prisma/client").$Enums.RoleType;
             };
         } & {
-            applicationId: string;
             assignedAt: Date;
+            applicationId: string;
             engineerId: string;
         })[];
     } & {
-        id: string;
-        createdAt: Date;
         description: string;
-        warehouseId: number;
-        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
     }>;
     addPhoto(id: string, body: AddApplicationPhotoDto, req: {
         user?: {
             id: string;
         };
     }): Promise<{
-        url: string;
         id: string;
         createdAt: Date;
-        applicationId: string;
-        uploadedById: string | null;
         kind: import("@prisma/client").$Enums.PhotoKind;
+        url: string;
+        uploadedById: string | null;
+        applicationId: string;
     }>;
     uploadPhoto(id: string, file: Express.Multer.File, kind: AddApplicationPhotoDto["kind"], req: {
         user?: {
             id: string;
         };
     }): Promise<{
-        url: string;
         id: string;
         createdAt: Date;
-        applicationId: string;
-        uploadedById: string | null;
         kind: import("@prisma/client").$Enums.PhotoKind;
+        url: string;
+        uploadedById: string | null;
+        applicationId: string;
     }>;
     updateDescription(id: string, body: UpdateApplicationDescriptionDto): Promise<{
-        id: string;
-        createdAt: Date;
         description: string;
-        warehouseId: number;
-        userId: string;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
+    }>;
+    updateEngineerComment(id: string, body: UpdateApplicationCommentDto, req: {
+        user?: {
+            id: string;
+            role: RoleType;
+        };
+    }): Promise<{
+        description: string;
+        status: import("@prisma/client").$Enums.ApplicationStatus;
+        openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
+        id: string;
+        engineerComment: string | null;
+        createdAt: Date;
+        warehouseId: number;
+        userId: string;
     }>;
 }

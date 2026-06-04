@@ -9,3 +9,5 @@ export { CreateTenantModal } from './tenants-list/create-tenant-modal';
 export { EngineersList } from './engineers-list/index';
 export { CreateEngineerModal } from './engineers-list/create-engineer-modal';
 export { ApplicationsList } from './applications-list/index';
+export { ApplicationsEngineerList } from './applications-engineer-list/index';
+export { RoleGuard } from './role-guard/index';

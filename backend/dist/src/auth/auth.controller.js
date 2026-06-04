@@ -37,6 +37,8 @@ let AuthController = class AuthController {
                 email: user.email,
                 role: user.role,
             },
+            accessToken: tokens.accessToken,
+            accessTokenExpiresIn: tokens.accessTokenExpiresIn,
         };
     }
     async refresh(res, body, req) {
@@ -46,7 +48,10 @@ let AuthController = class AuthController {
         }
         const tokens = await this.authService.refreshTokens(token);
         this.setAuthCookies(res, tokens);
-        return { accessTokenExpiresIn: tokens.accessTokenExpiresIn };
+        return {
+            accessToken: tokens.accessToken,
+            accessTokenExpiresIn: tokens.accessTokenExpiresIn,
+        };
     }
     async logout(res, body, req) {
         const token = body.refreshToken ?? req.cookies?.refresh_token;

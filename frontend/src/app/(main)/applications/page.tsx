@@ -1,11 +1,14 @@
 'use client';
 
-import { ApplicationsList } from "@/components";
+import { ApplicationsList, RoleGuard } from "@/components";
+import { RoleType } from "@/lib";
 
 export default function ApplicationsPage() {
     return (
-        <div className="p-[clamp(16px,4vw,32px)]">
-            <ApplicationsList />
-        </div>
+        <RoleGuard allowedRoles={[RoleType.MANAGER]}>
+            <div className="p-[clamp(16px,4vw,32px)]">
+                <ApplicationsList />
+            </div>
+        </RoleGuard>
     )
 }

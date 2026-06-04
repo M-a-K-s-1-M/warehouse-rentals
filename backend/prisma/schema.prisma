@@ -120,9 +120,10 @@ model Application {
   user   User   @relation(fields: [userId], references: [id])
   userId String @map("user_id")
 
-  description String
-  status      ApplicationStatus     @map("status")
-  openStatus  ApplicationOpenStatus @default(OPEN) @map("open_status")
+  description     String
+  engineerComment String?               @map("engineer_comment")
+  status          ApplicationStatus     @map("status")
+  openStatus      ApplicationOpenStatus @default(OPEN) @map("open_status")
 
   createdAt DateTime              @default(now()) @map("created_at")
   photos    ApplicationPhoto[]
