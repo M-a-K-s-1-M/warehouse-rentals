@@ -10,4 +10,5 @@ export { EngineersList } from './engineers-list/index';
 export { CreateEngineerModal } from './engineers-list/create-engineer-modal';
 export { ApplicationsList } from './applications-list/index';
 export { ApplicationsEngineerList } from './applications-engineer-list/index';
+export { ApplicationsClientList } from './applications-client-list/index';
 export { RoleGuard } from './role-guard/index';

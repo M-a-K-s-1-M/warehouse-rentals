@@ -28,6 +28,30 @@ let ApplicationsService = class ApplicationsService {
         role: true,
         createdAt: true,
     };
+    async assertUserHasRental(input) {
+        const rental = await this.prisma.rental.findFirst({
+            where: {
+                userId: input.userId,
+                warehouseId: input.warehouseId,
+            },
+            select: { id: true },
+        });
+        if (!rental) {
+            throw new common_2.BadRequestException("Аренда не найдена");
+        }
+    }
+    async assertUserOwnsApplication(applicationId, userId) {
+        const application = await this.prisma.application.findUnique({
+            where: { id: applicationId },
+            select: { userId: true },
+        });
+        if (!application) {
+            throw new common_2.NotFoundException("Заявка не найдена");
+        }
+        if (application.userId !== userId) {
+            throw new common_2.BadRequestException("Можно добавлять фото только в свои заявки");
+        }
+    }
     async createApplication(input) {
         const application = await this.prisma.application.create({
             data: {

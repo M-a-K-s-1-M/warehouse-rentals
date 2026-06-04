@@ -6,6 +6,11 @@ export declare class ApplicationsService {
     private readonly gateway;
     constructor(prisma: PrismaService, gateway: ApplicationsGateway);
     private readonly engineerSelect;
+    assertUserHasRental(input: {
+        userId: string;
+        warehouseId: number;
+    }): Promise<void>;
+    assertUserOwnsApplication(applicationId: string, userId: string): Promise<void>;
     createApplication(input: {
         warehouseId: number;
         userId: string;
@@ -18,8 +23,8 @@ export declare class ApplicationsService {
         }>;
     }): Promise<{
         warehouse: {
-            description: string | null;
             id: number;
+            description: string | null;
             createdAt: Date;
             title: string;
             address: string;
@@ -62,11 +67,11 @@ export declare class ApplicationsService {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;
@@ -86,8 +91,8 @@ export declare class ApplicationsService {
     }>;
     getApplicationById(id: string): Promise<{
         warehouse: {
-            description: string | null;
             id: number;
+            description: string | null;
             createdAt: Date;
             title: string;
             address: string;
@@ -130,11 +135,11 @@ export declare class ApplicationsService {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;
@@ -146,8 +151,8 @@ export declare class ApplicationsService {
         warehouseId?: number;
     }): Promise<({
         warehouse: {
-            description: string | null;
             id: number;
+            description: string | null;
             createdAt: Date;
             title: string;
             address: string;
@@ -190,31 +195,31 @@ export declare class ApplicationsService {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;
     })[]>;
     updateStatus(id: string, status: ApplicationStatus): Promise<{
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;
     }>;
     updateOpenStatus(id: string, openStatus: ApplicationOpenStatus): Promise<{
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;
@@ -236,21 +241,21 @@ export declare class ApplicationsService {
             engineerId: string;
         })[];
     } & {
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;
     }>;
     updateDescription(id: string, description: string): Promise<{
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;
@@ -259,11 +264,11 @@ export declare class ApplicationsService {
         id: string;
         role: RoleType;
     }): Promise<{
+        id: string;
         description: string;
+        engineerComment: string | null;
         status: import("@prisma/client").$Enums.ApplicationStatus;
         openStatus: import("@prisma/client").$Enums.ApplicationOpenStatus;
-        id: string;
-        engineerComment: string | null;
         createdAt: Date;
         warehouseId: number;
         userId: string;

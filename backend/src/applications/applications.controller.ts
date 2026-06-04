@@ -37,6 +37,7 @@ export class ApplicationsController {
     constructor(private readonly applicationsService: ApplicationsService) { }
 
     @Post()
+    @Roles(RoleType.MANAGER, RoleType.CLIENT)
     async createApplication(@Body() body: CreateApplicationDto, @Req() req: { user?: { id: string; role: RoleType } }) {
         const userId = body.userId ?? req.user?.id;
         if (!userId) {
@@ -47,6 +48,13 @@ export class ApplicationsController {
             throw new ForbiddenException("Можно создавать заявку только для себя");
         }
 
+        if (req.user?.role === RoleType.CLIENT) {
+            await this.applicationsService.assertUserHasRental({
+                userId,
+                warehouseId: body.warehouseId,
+            });
+        }
+
         return this.applicationsService.createApplication({
             warehouseId: body.warehouseId,
             userId,
@@ -55,11 +63,13 @@ export class ApplicationsController {
     }
 
     @Get()
+    @Roles(RoleType.MANAGER, RoleType.ENGINEER, RoleType.CLIENT)
     async listApplications(
         @Query("status") status?: ApplicationStatus,
         @Query("openStatus") openStatus?: ApplicationOpenStatus,
         @Query("userId") userId?: string,
         @Query("warehouseId") warehouseId?: string,
+        @Req() req?: { user?: { id: string; role: RoleType } },
     ) {
         let resolvedWarehouseId: number | undefined = undefined;
         if (warehouseId !== undefined) {
@@ -70,10 +80,17 @@ export class ApplicationsController {
             resolvedWarehouseId = parsed;
         }
 
+        const role = req?.user?.role;
+        const requesterId = req?.user?.id;
+        const resolvedUserId = role === RoleType.CLIENT ? requesterId : userId;
+        if (role === RoleType.CLIENT && !requesterId) {
+            throw new ForbiddenException("User required");
+        }
+
         return this.applicationsService.listApplications({
             status,
             openStatus,
-            userId,
+            userId: resolvedUserId,
             warehouseId: resolvedWarehouseId,
         });
     }
@@ -105,12 +122,15 @@ export class ApplicationsController {
     }
 
     @Post(":id/photos")
-    @Roles(RoleType.MANAGER, RoleType.ENGINEER)
+    @Roles(RoleType.MANAGER, RoleType.ENGINEER, RoleType.CLIENT)
     async addPhoto(
         @Param("id") id: string,
         @Body() body: AddApplicationPhotoDto,
         @Req() req: { user?: { id: string } },
     ) {
+        if (req.user?.id) {
+            await this.applicationsService.assertUserOwnsApplication(id, req.user.id);
+        }
         return this.applicationsService.addPhoto({
             applicationId: id,
             url: body.url,
@@ -120,7 +140,7 @@ export class ApplicationsController {
     }
 
     @Post(":id/photos/upload")
-    @Roles(RoleType.MANAGER, RoleType.ENGINEER)
+    @Roles(RoleType.MANAGER, RoleType.ENGINEER, RoleType.CLIENT)
     @UseInterceptors(
         FileInterceptor("file", {
             storage: diskStorage({
@@ -142,6 +162,9 @@ export class ApplicationsController {
         @Body("kind") kind: AddApplicationPhotoDto["kind"],
         @Req() req: { user?: { id: string } },
     ) {
+        if (req.user?.id) {
+            await this.applicationsService.assertUserOwnsApplication(id, req.user.id);
+        }
         const relativePath = `/uploads/applications/${file.filename}`;
         return this.applicationsService.addPhoto({
             applicationId: id,

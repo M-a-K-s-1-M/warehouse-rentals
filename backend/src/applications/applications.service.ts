@@ -24,6 +24,35 @@ export class ApplicationsService {
         createdAt: true,
     };
 
+    async assertUserHasRental(input: { userId: string; warehouseId: number }) {
+        const rental = await this.prisma.rental.findFirst({
+            where: {
+                userId: input.userId,
+                warehouseId: input.warehouseId,
+            },
+            select: { id: true },
+        });
+
+        if (!rental) {
+            throw new BadRequestException("Аренда не найдена");
+        }
+    }
+
+    async assertUserOwnsApplication(applicationId: string, userId: string) {
+        const application = await this.prisma.application.findUnique({
+            where: { id: applicationId },
+            select: { userId: true },
+        });
+
+        if (!application) {
+            throw new NotFoundException("Заявка не найдена");
+        }
+
+        if (application.userId !== userId) {
+            throw new BadRequestException("Можно добавлять фото только в свои заявки");
+        }
+    }
+
     async createApplication(input: {
         warehouseId: number;
         userId: string;

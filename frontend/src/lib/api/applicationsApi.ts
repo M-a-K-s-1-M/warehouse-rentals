@@ -2,8 +2,13 @@ import { $api } from "../config";
 import { IApplication } from "../types";
 
 export class ApplicationsApi {
-    static async listApplications(): Promise<IApplication[]> {
-        const res = await $api.get("/applications");
+    static async listApplications(params?: {
+        status?: string;
+        openStatus?: string;
+        userId?: string;
+        warehouseId?: number;
+    }): Promise<IApplication[]> {
+        const res = await $api.get("/applications", { params });
         return res.data;
     }
 

@@ -33,10 +33,21 @@ let RentalsController = class RentalsController {
             endDate: new Date(body.endDate),
         });
     }
-    async listRentals(warehouseId, userId) {
+    async listRentals(request, warehouseId, userId) {
+        const role = request.user?.role;
+        const requesterId = request.user?.id;
         const parsedWarehouseId = warehouseId ? Number(warehouseId) : undefined;
         if (warehouseId && !Number.isFinite(parsedWarehouseId)) {
             throw new common_1.BadRequestException("warehouseId must be a number");
+        }
+        if (role === client_1.RoleType.CLIENT) {
+            if (!requesterId) {
+                throw new common_1.BadRequestException("User not found");
+            }
+            return this.rentalsService.listRentals({
+                warehouseId: parsedWarehouseId,
+                userId: requesterId,
+            });
         }
         return this.rentalsService.listRentals({
             warehouseId: parsedWarehouseId,
@@ -60,6 +71,7 @@ let RentalsController = class RentalsController {
 exports.RentalsController = RentalsController;
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_rental_dto_1.CreateRentalDto]),
@@ -67,14 +79,17 @@ __decorate([
 ], RentalsController.prototype, "createRental", null);
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)("warehouseId")),
-    __param(1, (0, common_1.Query)("userId")),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.CLIENT),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)("warehouseId")),
+    __param(2, (0, common_1.Query)("userId")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], RentalsController.prototype, "listRentals", null);
 __decorate([
     (0, common_1.Get)(":id"),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER),
     __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -82,6 +97,7 @@ __decorate([
 ], RentalsController.prototype, "getRental", null);
 __decorate([
     (0, common_1.Patch)(":id"),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER),
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -90,6 +106,7 @@ __decorate([
 ], RentalsController.prototype, "updateRental", null);
 __decorate([
     (0, common_1.Delete)(":id"),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER),
     __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -98,7 +115,6 @@ __decorate([
 exports.RentalsController = RentalsController = __decorate([
     (0, common_1.Controller)("rentals"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER),
     __metadata("design:paramtypes", [rentals_service_1.RentalsService])
 ], RentalsController);
 //# sourceMappingURL=rentals.controller.js.map

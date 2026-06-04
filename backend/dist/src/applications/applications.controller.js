@@ -47,13 +47,19 @@ let ApplicationsController = class ApplicationsController {
         if (body.userId && req.user?.role !== client_1.RoleType.MANAGER) {
             throw new common_1.ForbiddenException("Можно создавать заявку только для себя");
         }
+        if (req.user?.role === client_1.RoleType.CLIENT) {
+            await this.applicationsService.assertUserHasRental({
+                userId,
+                warehouseId: body.warehouseId,
+            });
+        }
         return this.applicationsService.createApplication({
             warehouseId: body.warehouseId,
             userId,
             description: body.description,
         });
     }
-    async listApplications(status, openStatus, userId, warehouseId) {
+    async listApplications(status, openStatus, userId, warehouseId, req) {
         let resolvedWarehouseId = undefined;
         if (warehouseId !== undefined) {
             const parsed = Number(warehouseId);
@@ -62,10 +68,16 @@ let ApplicationsController = class ApplicationsController {
             }
             resolvedWarehouseId = parsed;
         }
+        const role = req?.user?.role;
+        const requesterId = req?.user?.id;
+        const resolvedUserId = role === client_1.RoleType.CLIENT ? requesterId : userId;
+        if (role === client_1.RoleType.CLIENT && !requesterId) {
+            throw new common_1.ForbiddenException("User required");
+        }
         return this.applicationsService.listApplications({
             status,
             openStatus,
-            userId,
+            userId: resolvedUserId,
             warehouseId: resolvedWarehouseId,
         });
     }
@@ -85,6 +97,9 @@ let ApplicationsController = class ApplicationsController {
         });
     }
     async addPhoto(id, body, req) {
+        if (req.user?.id) {
+            await this.applicationsService.assertUserOwnsApplication(id, req.user.id);
+        }
         return this.applicationsService.addPhoto({
             applicationId: id,
             url: body.url,
@@ -93,6 +108,9 @@ let ApplicationsController = class ApplicationsController {
         });
     }
     async uploadPhoto(id, file, kind, req) {
+        if (req.user?.id) {
+            await this.applicationsService.assertUserOwnsApplication(id, req.user.id);
+        }
         const relativePath = `/uploads/applications/${file.filename}`;
         return this.applicationsService.addPhoto({
             applicationId: id,
@@ -114,6 +132,7 @@ let ApplicationsController = class ApplicationsController {
 exports.ApplicationsController = ApplicationsController;
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.CLIENT),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -122,12 +141,14 @@ __decorate([
 ], ApplicationsController.prototype, "createApplication", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER, client_1.RoleType.CLIENT),
     __param(0, (0, common_1.Query)("status")),
     __param(1, (0, common_1.Query)("openStatus")),
     __param(2, (0, common_1.Query)("userId")),
     __param(3, (0, common_1.Query)("warehouseId")),
+    __param(4, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, Object]),
     __metadata("design:returntype", Promise)
 ], ApplicationsController.prototype, "listApplications", null);
 __decorate([
@@ -166,7 +187,7 @@ __decorate([
 ], ApplicationsController.prototype, "assignEngineers", null);
 __decorate([
     (0, common_1.Post)(":id/photos"),
-    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER, client_1.RoleType.CLIENT),
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
@@ -176,7 +197,7 @@ __decorate([
 ], ApplicationsController.prototype, "addPhoto", null);
 __decorate([
     (0, common_1.Post)(":id/photos/upload"),
-    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.MANAGER, client_1.RoleType.ENGINEER, client_1.RoleType.CLIENT),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
             destination: (req, file, cb) => {
